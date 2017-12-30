@@ -33,3 +33,6 @@ export NDK="path/to/ndk-r15"
 
 ## Credit
 Build instruction is learned from https://github.com/wseemann/FFmpegMediaPlayer
+
+## FFmpeg license
+This software uses code of <a href="http://ffmpeg.org">FFmpeg</a> licensed under the <a href="http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">LGPLv2.1</a> and its source can be downloaded <a href="build_scripts/ffmpeg-3.3.2.tar.bz2">here</a>.

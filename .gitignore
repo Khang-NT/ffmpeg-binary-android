@@ -3,3 +3,8 @@ build_scripts/*
 !build_scripts/build_all.sh
 !build_scripts/build_ffmpeg.sh
 !build_scripts/ffmpeg-3.3.2.tar.bz2
+*/include/
+*/lib/
+*/share/
+*/bin/*
+!*/bin/ffmpeg

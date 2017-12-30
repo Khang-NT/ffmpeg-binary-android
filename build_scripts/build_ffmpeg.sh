@@ -44,12 +44,12 @@ else
     echo "Using existing `pwd`/yasm-${YASM_VERSION}"
 fi
 
-if [ ! -d "x264" ]; then
-    echo "Cloning x264"
-    git clone --depth=1 git://git.videolan.org/x264.git x264
-else
-    echo "Using existing `pwd`/x264"
-fi
+# if [ ! -d "x264" ]; then
+#     echo "Cloning x264"
+#     git clone --depth=1 git://git.videolan.org/x264.git x264
+# else
+#     echo "Using existing `pwd`/x264"
+# fi
 
 OPUS_VERSION="1.1.5"
 if [ ! -d "opus-${OPUS_VERSION}" ]; then
@@ -175,31 +175,31 @@ make -j8
 make install
 popd
 
-pushd x264
-CPP="${CROSS_PREFIX}cpp" \
-CXX="${CROSS_PREFIX}g++" \
-CC="${CROSS_PREFIX}gcc" \
-LD="${CROSS_PREFIX}ld" \
-AR="${CROSS_PREFIX}ar" \
-NM="${CROSS_PREFIX}nm" \
-RANLIB="${CROSS_PREFIX}ranlib" \
-STRIP=${CROSS_PREFIX}strip \
-LDFLAGS="-fPIE -pie " \
-CFLAGS="-fPIE " \
-./configure \
-    --cross-prefix=$PREBUILT/bin/$HOST- \
-    --sysroot=$PLATFORM \
-    --host=$HOST \
-    --enable-pic \
-    --enable-static \
-    --disable-shared \
-    --disable-cli \
-    --extra-cflags="$OPTIMIZE_CFLAGS " \
-    --prefix=$PREFIX
-make clean
-make -j8
-make install
-popd
+# pushd x264
+# CPP="${CROSS_PREFIX}cpp" \
+# CXX="${CROSS_PREFIX}g++" \
+# CC="${CROSS_PREFIX}gcc" \
+# LD="${CROSS_PREFIX}ld" \
+# AR="${CROSS_PREFIX}ar" \
+# NM="${CROSS_PREFIX}nm" \
+# RANLIB="${CROSS_PREFIX}ranlib" \
+# STRIP=${CROSS_PREFIX}strip \
+# LDFLAGS="-fPIE -pie " \
+# CFLAGS="-fPIE " \
+# ./configure \
+#     --cross-prefix=$PREBUILT/bin/$HOST- \
+#     --sysroot=$PLATFORM \
+#     --host=$HOST \
+#     --enable-pic \
+#     --enable-static \
+#     --disable-shared \
+#     --disable-cli \
+#     --extra-cflags="$OPTIMIZE_CFLAGS " \
+#     --prefix=$PREFIX
+# make clean
+# make -j8
+# make install
+# popd
 
 pushd opus-${OPUS_VERSION}
 CPP="${CROSS_PREFIX}cpp" \
@@ -395,7 +395,6 @@ STRIP=${CROSS_PREFIX}strip \
     --enable-libmp3lame \
     --enable-libopus \
     --enable-libvorbis \
-    --enable-libx264 \
     --enable-bsf=aac_adtstoasc \
     \
     --disable-demuxers \

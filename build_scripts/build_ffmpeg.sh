@@ -389,7 +389,7 @@ STRIP=${CROSS_PREFIX}strip \
     --disable-ffserver \
     \
     --disable-protocols \
-    --enable-protocol='file,pipe' \
+    --enable-protocol='file,pipe,tcp' \
     \
     --enable-libshine \
     --enable-libmp3lame \

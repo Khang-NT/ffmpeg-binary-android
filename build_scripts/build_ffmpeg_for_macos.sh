@@ -3,27 +3,7 @@
 set -e
 set -x
 
-export TARGET=$1
-export PREFIX=$2
-
-ARM_PLATFORM=$NDK/platforms/android-16/arch-arm/
-ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64
-
-ARM64_PLATFORM=$NDK/platforms/android-21/arch-arm64/
-ARM64_PREBUILT=$NDK/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64
-
-X86_PLATFORM=$NDK/platforms/android-16/arch-x86/
-X86_PREBUILT=$NDK/toolchains/x86-4.9/prebuilt/darwin-x86_64
-
-X86_64_PLATFORM=$NDK/platforms/android-21/arch-x86_64/
-X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/darwin-x86_64
-
-MIPS_PLATFORM=$NDK/platforms/android-16/arch-mips/
-MIPS_PREBUILT=$NDK/toolchains/mipsel-linux-android-4.9/prebuilt/darwin-x86_64
-
-MIPS64_PLATFORM=$NDK/platforms/android-21/arch-mips64/
-MIPS64_PREBUILT=$NDK/toolchains/mips64el-linux-android-4.9/prebuilt/darwin-x86_64
-
+export PREFIX=$1
 
 FFMPEG_VERSION="3.3.2"
 if [ ! -d "ffmpeg-${FFMPEG_VERSION}" ]; then
@@ -118,56 +98,23 @@ fi
 
 function build_one
 {
-if [ $ARCH == "arm" ]
-then
-    PLATFORM=$ARM_PLATFORM
-    HOST=arm-linux-androideabi
-    export CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
-#added by alexvas
-elif [ $ARCH == "arm64" ]
-then
-    PLATFORM=$ARM64_PLATFORM
-    HOST=aarch64-linux-android
-    export CROSS_PREFIX=$ARM64_PREBUILT/bin/$HOST-
-elif [ $ARCH == "mips" ]
-then
-    PLATFORM=$MIPS_PLATFORM
-    HOST=mipsel-linux-android
-    export CROSS_PREFIX=$MIPS_PREBUILT/bin/$HOST-
-elif [ $ARCH == "mips64" ]
-then
-    PLATFORM=$MIPS64_PLATFORM
-    HOST=mips64el-linux-android
-    export CROSS_PREFIX=$MIPS64_PREBUILT/bin/$HOST-
-elif [ $ARCH == "x86_64" ]
-then
-    PLATFORM=$X86_64_PLATFORM
-    HOST=x86_64-linux-android
-    export CROSS_PREFIX=$X86_64_PREBUILT/bin/$HOST-
-elif [ $ARCH == "i686" ]
-then
-    PLATFORM=$X86_PLATFORM
-    HOST=i686-linux-android
-    export CROSS_PREFIX=$X86_PREBUILT/bin/$HOST-
-fi
 
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
-export CPP="${CROSS_PREFIX}cpp"
-export CXX="${CROSS_PREFIX}g++"
-export CC="${CROSS_PREFIX}gcc"
-export LD="${CROSS_PREFIX}ld"
-export AR="${CROSS_PREFIX}ar"
-export NM="${CROSS_PREFIX}nm"
-export RANLIB="${CROSS_PREFIX}ranlib"
-export LDFLAGS="-L$PREFIX/lib -fPIE -pie "
-export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$PLATFORM -fPIE "
+unset CPP
+unset CXX
+unset CC
+unset LD
+unset AR
+unset NM
+unset RANLIB
+unset STRIP
+unset CPPFLAGS
+export LDFLAGS="-L$PREFIX/lib "
+export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include "
 export CXXFLAGS="$CFLAGS"
-export CPPFLAGS="--sysroot=$PLATFORM "
-export STRIP=${CROSS_PREFIX}strip
 
 pushd yasm-${YASM_VERSION}
-./configure --prefix=$PREFIX \
-    --host=$HOST
+./configure --prefix=$PREFIX 
 make clean
 make -j8
 make install
@@ -191,7 +138,6 @@ popd
 pushd opus-${OPUS_VERSION}
 ./configure \
     --prefix=$PREFIX \
-    --host=$HOST \
     --enable-static \
     --disable-shared \
     --disable-doc \
@@ -207,10 +153,8 @@ popd
 # pushd fdk-aac-${FDK_AAC_VERSION}
 # ./configure \
 #     --prefix=$PREFIX \
-#     --host=$HOST \
 #     --enable-static \
-#     --disable-shared \
-#     --with-sysroot=$PLATFORM
+#     --disable-shared 
 # make clean
 # make -j8
 # make install
@@ -219,7 +163,6 @@ popd
 pushd lame-${LAME_VERSION}
 ./configure \
     --prefix=$PREFIX \
-    --host=$HOST \
     --enable-static \
     --disable-shared 
 
@@ -232,7 +175,6 @@ pushd shine
 ./bootstrap
 ./configure \
     --prefix=$PREFIX \
-    --host=$HOST \
     --enable-static \
     --disable-shared
 
@@ -244,10 +186,8 @@ popd
 pushd libogg-${LIBOGG_VERSION}
 ./configure \
     --prefix=$PREFIX \
-    --host=$HOST \
     --enable-static \
-    --disable-shared \
-    --with-sysroot=$PLATFORM
+    --disable-shared 
 make clean
 make -j8
 make install
@@ -256,10 +196,8 @@ popd
 pushd libvorbis-${LIBVORBIS_VERSION}
 ./configure \
     --prefix=$PREFIX \
-    --host=$HOST \
     --enable-static \
     --disable-shared \
-    --with-sysroot=$PLATFORM \
     --with-ogg=$PREFIX
 make clean
 make -j8
@@ -272,12 +210,6 @@ popd
 
 pushd ffmpeg-$FFMPEG_VERSION
 ./configure --prefix=$PREFIX \
-    --target-os=linux \
-    --arch=$ARCH \
-    --cross-prefix=$CROSS_PREFIX \
-    --enable-cross-compile \
-    --sysroot=$PLATFORM \
-    --pkg-config=/usr/local/bin/pkg-config \
     --pkg-config-flags="--static" \
     --enable-pic \
     --enable-small \
@@ -319,98 +251,8 @@ make install V=1
 popd
 }
 
-if [ $TARGET == 'arm-v5te' ]; then
-    #arm v5te
-    CPU=armv5te
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v6' ]; then
-    #arm v6
-    CPU=armv6
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7vfpv3' ]; then
-    #arm v7vfpv3
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfpv3-d16 -marm -march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7vfp' ]; then
-    #arm v7vfp
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7n' ]; then
-    #arm v7n
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=neon -marm -mtune=cortex-a8 -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=--enable-neon
-    build_one
-elif [ $TARGET == 'arm-v6+vfp' ]; then
-    #arm v6+vfp
-    CPU=armv6
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-DCMP_HAVE_VFP -mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm64-v8a' ]; then
-    #arm64-v8a
-    CPU=armv8-a
-    ARCH=arm64
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'x86_64' ]; then
-    #x86_64
-    CPU=x86-64
-    ARCH=x86_64
-    OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'i686' ]; then
-    #x86
-    CPU=i686
-    ARCH=i686
-    OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'mips' ]; then
-    #mips
-    CPU=mips32
-    ARCH=mips
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
-    #"-std=c99 -O3 -Wall -pipe -fpic -fasm -ftree-vectorize -ffunction-sections -funwind-tables -fomit-frame-pointer -funswitch-loops -finline-limit=300 -finline-functions -fpredictive-commoning -fgcse-after-reload -fipa-cp-clone -Wno-psabi -Wa,--noexecstack"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'mips64' ]; then
-    #mips
-    CPU=mips64r6
-    ARCH=mips64
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
-    #"-std=c99 -O3 -Wall -pipe -fpic -fasm -ftree-vectorize -ffunction-sections -funwind-tables -fomit-frame-pointer -funswitch-loops -finline-limit=300 -finline-functions -fpredictive-commoning -fgcse-after-reload -fipa-cp-clone -Wno-psabi -Wa,--noexecstack"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'armv7-a' ]; then
-    #arm armv7-a
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -marm -march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm' ]; then
-    #arm
-    CPU=armv5te
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-fi
+
+OPTIMIZE_CFLAGS="-O2 -pipe -march=native"
+ADDITIONAL_CONFIGURE_FLAG=
+build_one
 

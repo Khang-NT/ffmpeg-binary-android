@@ -294,12 +294,6 @@ pushd ffmpeg-$FFMPEG_VERSION
     --disable-protocols \
     --enable-protocol='file,pipe,tcp' \
     \
-    --enable-libshine \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libvorbis \
-    --enable-bsf=aac_adtstoasc \
-    \
     --disable-demuxers \
     --disable-muxers \
     --enable-demuxer='mp4,flv,matroska,webm,mov,3gp,mp3,libmp3lame,libshine,aac,aac_latm,m4a,vorbis,ogg,opus,mp4a,mpegts,image2,mjpeg,jpeg,ipod,dnxhd' \
@@ -307,8 +301,14 @@ pushd ffmpeg-$FFMPEG_VERSION
     \
     --disable-encoders \
     --disable-decoders \
-    --enable-encoder='mp4,m4a,aac,aac_latm,mp3,libmp3lame,libshine,mp4a,mjpeg,jpeg,image2,ipod,dnxhd' \
-    --enable-decoder='mp4,flv,matroska,webm,mov,3gp,mp3,libmp3lame,libshine,aac,aac_latm,m4a,vorbis,ogg,opus,mp4a,mjpeg,jpeg,image2,ipod,dnxhd' \
+    --enable-encoder='mp4,m4a,aac,aac_latm,mp3,libmp3lame,libshine,mp4a,mjpeg,jpeg,image2,ipod,dnxhd,ogg,libopus,opus,flv,3gp,flac' \
+    --enable-decoder='mp4,flv,matroska,webm,mov,3gp,mp3,libmp3lame,libshine,aac,aac_latm,m4a,vorbis,ogg,libopus,opus,flac,mp4a,mjpeg,jpeg,image2,ipod,dnxhd' \
+    \
+    --enable-libshine \
+    --enable-libmp3lame \
+    --enable-libopus \
+    --enable-libvorbis \
+    --enable-bsf=aac_adtstoasc \
     \
     --disable-doc \
     $ADDITIONAL_CONFIGURE_FLAG

@@ -26,28 +26,28 @@ cd $WORKING_DIR
 ./build_ffmpeg_for_macos.sh $TARGET_NATIVE_DIR
 
 cd $WORKING_DIR
+./build_ffmpeg.sh armv7-a $TARGET_ARMEABIV7A_DIR
+
+cd $WORKING_DIR
+./build_ffmpeg.sh arm $TARGET_ARMEABI_DIR
+
+cd $WORKING_DIR
+./build_ffmpeg.sh arm64-v8a $TARGET_ARMEABI_64_DIR
+
+cd $WORKING_DIR
 ./build_ffmpeg.sh i686 $TARGET_X86_DIR
 
 cd $WORKING_DIR
 ./build_ffmpeg.sh x86_64 $TARGET_X86_64_DIR
 
 cd $WORKING_DIR
-./build_ffmpeg.sh arm $TARGET_ARMEABI_DIR
-
-cd $WORKING_DIR
-./build_ffmpeg.sh armv7-a $TARGET_ARMEABIV7A_DIR
-
-cd $WORKING_DIR
-./build_ffmpeg.sh arm-v7n $TARGET_ARMEABIV7N_DIR
-
-cd $WORKING_DIR
-./build_ffmpeg.sh arm64-v8a $TARGET_ARMEABI_64_DIR
-
-cd $WORKING_DIR
 ./build_ffmpeg.sh mips $TARGET_MIPS_DIR
 
 cd $WORKING_DIR
 ./build_ffmpeg.sh mips64 $TARGET_MIPS64_DIR
+
+cd $WORKING_DIR
+./build_ffmpeg.sh arm-v7n $TARGET_ARMEABIV7N_DIR
 
 echo "Build complete."
 exit 0

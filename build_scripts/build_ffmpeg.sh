@@ -380,7 +380,8 @@ elif [ $TARGET == 'i686' ]; then
     CPU=i686
     ARCH=i686
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
+    # disable asm to fix 
+    ADDITIONAL_CONFIGURE_FLAG=' --disable-asm ' 
     build_one
 elif [ $TARGET == 'mips' ]; then
     #mips

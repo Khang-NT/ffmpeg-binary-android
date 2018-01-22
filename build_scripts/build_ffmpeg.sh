@@ -292,7 +292,7 @@ pushd ffmpeg-$FFMPEG_VERSION
     --disable-ffserver \
     \
     --disable-protocols \
-    --enable-protocol='file,pipe,tcp' \
+    --enable-protocol='file,pipe' \
     \
     --disable-demuxers \
     --disable-muxers \

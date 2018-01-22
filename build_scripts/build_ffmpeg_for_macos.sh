@@ -224,7 +224,7 @@ pushd ffmpeg-$FFMPEG_VERSION
     --disable-ffserver \
     \
     --disable-protocols \
-    --enable-protocol='file,pipe,tcp' \
+    --enable-protocol='file,pipe' \
     \
     --enable-libshine \
     --enable-libmp3lame \

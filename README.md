@@ -8,20 +8,39 @@ This repo contains static FFmpeg executable binary which compatible with all And
 - `mips`  (Android 16+)
 - `mips64` (Android 21+)
 
+This is main configuration, optimizes for smallest binary size with most common media codecs and container formats:
 ```
-$ ./ffmpeg
-ffmpeg version 3.3.2 Copyright (c) 2000-2017 the FFmpeg developers
-  built with gcc 4.9.x (GCC) 20150123 (prerelease)
-  configuration: --prefix=/Users/khangnt/Desktop/ffmpeg-binary-android/build_scripts/build/armeabi-v7a --target-os=linux --arch=arm --cross-prefix=/Users/khangnt/Desktop/android-ndk-r15/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi- --enable-cross-compile --sysroot=/Users/khangnt/Desktop/android-ndk-r15/platforms/android-16/arch-arm/ --pkg-config=/usr/local/bin/pkg-config --pkg-config-flags=--static --extra-ldflags='-L/Users/khangnt/Desktop/ffmpeg-binary-android/build_scripts/build/armeabi-v7a/lib -fPIE -pie ' --extra-cflags='-mfloat-abi=softfp -marm -march=armv7-a -Os -O3 -I/Users/khangnt/Desktop/ffmpeg-binary-android/build_scripts/build/armeabi-v7a/include -fPIE ' --enable-pic --enable-small --enable-gpl --disable-shared --enable-static --enable-ffmpeg --disable-ffplay --disable-ffprobe --disable-ffserver --disable-protocols --enable-protocol='file,pipe' --enable-libshine --enable-libmp3lame --enable-libopus --enable-libvorbis --enable-bsf=aac_adtstoasc --disable-demuxers --disable-muxers --enable-demuxer='mp4,flv,matroska,webm,mov,3gp,mp3,libmp3lame,libshine,aac,aac_latm,m4a,vorbis,ogg,opus,mp4a,mpegts,image2,mjpeg,jpeg,ipod,dnxhd' --enable-muxer='mp4,flv,matroska,webm,3gp,mp3,libmp3lame,libshine,aac,aac_latm,m4a,vorbis,ogg,opus,mp4a,mpegts,mjpeg,jpeg,image2,ipod,dnxhd' --disable-encoders --disable-decoders --enable-encoder='mp4,m4a,aac,aac_latm,mp3,libmp3lame,libshine,mp4a,mjpeg,jpeg,image2,ipod,dnxhd' --enable-decoder='mp4,flv,matroska,webm,mov,3gp,mp3,libmp3lame,libshine,aac,aac_latm,m4a,vorbis,ogg,opus,mp4a,mjpeg,jpeg,image2,ipod,dnxhd' --disable-doc
-  libavutil      55. 58.100 / 55. 58.100
-  libavcodec     57. 89.100 / 57. 89.100
-  libavformat    57. 71.100 / 57. 71.100
-  libavdevice    57.  6.100 / 57.  6.100
-  libavfilter     6. 82.100 /  6. 82.100
-  libswscale      4.  6.100 /  4.  6.100
-  libswresample   2.  7.100 /  2.  7.100
-  libpostproc    54.  5.100 / 54.  5.100
-Hyper fast Audio and Video encoder
+[...]
+    --enable-pic \
+    --enable-small \
+    --enable-gpl \
+    \
+    --disable-shared \
+    --enable-static \
+    \
+    --enable-ffmpeg \
+    --disable-ffplay \
+    --disable-ffprobe \
+    --disable-ffserver \
+    \
+    --disable-protocols \
+    --enable-protocol='file,pipe' \
+    \
+    --disable-demuxers \
+    --disable-muxers \
+    --enable-demuxer='aac,avi,dnxhd,flac,flv,gif,h261,h263,h264,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,srt,wav,webvtt' \
+    --enable-muxer='3gp,dnxhd,flac,flv,gif,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,opus,srt,wav,webvtt,ipod' \
+    \
+    --disable-encoders \
+    --disable-decoders \
+    --enable-encoder='aac,dnxhd,flac,flv,gif,libmp3lame,libopus,libshine,libvorbis,mpeg4,png,srt,subrip,webvtt' \
+    --enable-decoder='aac,aac_at,aac_fixed,aac_latm,dnxhd,flac,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,libvorbis,mp3,mpeg4,wavpack,png,rawvideo,srt,webvtt' \
+    \
+    --enable-libshine \
+    --enable-libmp3lame \
+    --enable-libopus \
+    --enable-libvorbis \
+    --enable-bsf=aac_adtstoasc \
 ```
 
 ## Build  
@@ -31,8 +50,15 @@ export NDK="path/to/ndk-r15"
 ./build_all.sh
 ```
 
-## Credit
-Build instruction is learned from https://github.com/wseemann/FFmpegMediaPlayer
+## Referent
+  - [FFmpegMediaPlayer](https://github.com/wseemann/FFmpegMediaPlayer) by [wseemann](https://github.com/wseemann)
 
 ## FFmpeg license
 This software uses code of <a href="http://ffmpeg.org">FFmpeg</a> licensed under the <a href="http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">LGPLv2.1</a> and its source can be downloaded <a href="build_scripts/ffmpeg-3.3.2.tar.bz2">here</a>.
+
+## App using this repo:  
+![MediaConverterAndroid](https://github.com/Khang-NT/Android-Media-Converter/raw/master/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png)  
+**Media Converter Android:**  
+  - Github: [https://github.com/Khang-NT/Android-Media-Converter](https://github.com/Khang-NT/Android-Media-Converter)  
+  - PlayStore: [https://play.google.com/store/apps/details?id=com.github.khangnt.mcp](https://play.google.com/store/apps/details?id=com.github.khangnt.mcp)
+

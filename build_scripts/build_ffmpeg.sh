@@ -278,7 +278,7 @@ pushd ffmpeg-$FFMPEG_VERSION
     --cross-prefix=$CROSS_PREFIX \
     --enable-cross-compile \
     --sysroot=$PLATFORM \
-    --pkg-config=/usr/local/bin/pkg-config \
+    --pkg-config=$(which pkg-config) \
     --pkg-config-flags="--static" \
     --enable-pic \
     --enable-small \

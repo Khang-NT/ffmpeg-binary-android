@@ -160,8 +160,8 @@ export AR="${CROSS_PREFIX}ar"
 export NM="${CROSS_PREFIX}nm"
 export RANLIB="${CROSS_PREFIX}ranlib"
 export LDFLAGS="-L$PREFIX/lib -fPIE -pie "
-export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$PLATFORM -fPIE "
-export CXXFLAGS="$CFLAGS"
+export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$PLATFORM -fPIE -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\) "
+export CXXFLAGS="$CFLAGS "
 export CPPFLAGS="--sysroot=$PLATFORM "
 export STRIP=${CROSS_PREFIX}strip
 
@@ -182,6 +182,7 @@ popd
 #     --enable-static \
 #     --disable-shared \
 #     --disable-cli \
+#     --disable-opencl \
 #     --prefix=$PREFIX
 # make clean
 # make -j8

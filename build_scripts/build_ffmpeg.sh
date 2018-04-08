@@ -308,7 +308,7 @@ popd
 #     sudo mv gas-preprocessor.pl /usr/bin) || exit 1
 pushd ffmpeg-$FFMPEG_VERSION
 
-if [ $ARCH == "native" ]
+if [ $ARCH == "native" ] then
     CROSS_COMPILE_FLAGS=
 else 
     CROSS_COMPILE_FLAGS=--target-os=$TARGET_OS \

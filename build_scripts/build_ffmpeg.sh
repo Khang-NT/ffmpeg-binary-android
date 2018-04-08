@@ -54,7 +54,7 @@ if [ ! -d "ffmpeg-${FFMPEG_VERSION}" ]; then
     echo "Downloading ffmpeg-${FFMPEG_VERSION}.tar.bz2"
     curl -LO http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2
     echo "extracting ffmpeg-${FFMPEG_VERSION}.tar.bz2"
-    tar -xvf ffmpeg-${FFMPEG_VERSION}.tar.bz2
+    tar -xf ffmpeg-${FFMPEG_VERSION}.tar.bz2
 else
     echo "Using existing `pwd`/ffmpeg-${FFMPEG_VERSION}"
 fi
@@ -63,7 +63,7 @@ YASM_VERSION="1.3.0"
 if [ ! -d "yasm-${YASM_VERSION}" ]; then
     echo "Downloading yasm-${YASM_VERSION}"
     curl -O "http://www.tortall.net/projects/yasm/releases/yasm-${YASM_VERSION}.tar.gz"
-    tar -xvzf "yasm-${YASM_VERSION}.tar.gz"
+    tar -xzf "yasm-${YASM_VERSION}.tar.gz"
 else
     echo "Using existing `pwd`/yasm-${YASM_VERSION}"
 fi
@@ -79,7 +79,7 @@ OPUS_VERSION="1.1.5"
 if [ ! -d "opus-${OPUS_VERSION}" ]; then
     echo "Downloading opus-${OPUS_VERSION}"
     curl -LO https://archive.mozilla.org/pub/opus/opus-${OPUS_VERSION}.tar.gz
-    tar -xvzf opus-${OPUS_VERSION}.tar.gz
+    tar -xzf opus-${OPUS_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/opus-${OPUS_VERSION}"
 fi
@@ -88,7 +88,7 @@ FDK_AAC_VERSION="0.1.5"
 if [ ! -d "fdk-aac-${FDK_AAC_VERSION}" ]; then
     echo "Downloading fdk-aac-${FDK_AAC_VERSION}"
     curl -LO http://downloads.sourceforge.net/opencore-amr/fdk-aac-${FDK_AAC_VERSION}.tar.gz
-    tar -xvzf fdk-aac-${FDK_AAC_VERSION}.tar.gz
+    tar -xzf fdk-aac-${FDK_AAC_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/fdk-aac-${FDK_AAC_VERSION}"
 fi
@@ -98,7 +98,7 @@ LAME_VERSION="3.99.5"
 if [ ! -d "lame-${LAME_VERSION}" ]; then
     echo "Downloading lame-${LAME_VERSION}"
     curl -LO http://downloads.sourceforge.net/project/lame/lame/${LAME_MAJOR}/lame-${LAME_VERSION}.tar.gz
-    tar -xvzf lame-${LAME_VERSION}.tar.gz
+    tar -xzf lame-${LAME_VERSION}.tar.gz
     curl -L -o lame-${LAME_VERSION}/config.guess "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
     curl -L -o lame-${LAME_VERSION}/config.sub "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD"
 else
@@ -116,7 +116,7 @@ LIBOGG_VERSION="1.3.2"
 if [ ! -d "libogg-${LIBOGG_VERSION}" ]; then
     echo "Downloading libogg-${LIBOGG_VERSION}"
     curl -LO http://downloads.xiph.org/releases/ogg/libogg-${LIBOGG_VERSION}.tar.gz
-    tar -xvzf libogg-${LIBOGG_VERSION}.tar.gz
+    tar -xzf libogg-${LIBOGG_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/libogg-${LIBOGG_VERSION}"
 fi
@@ -125,7 +125,7 @@ LIBVORBIS_VERSION="1.3.4"
 if [ ! -d "libvorbis-${LIBVORBIS_VERSION}" ]; then
     echo "Downloading libvorbis-${LIBVORBIS_VERSION}"
     curl -LO http://downloads.xiph.org/releases/vorbis/libvorbis-${LIBVORBIS_VERSION}.tar.gz
-    tar -xvzf libvorbis-${LIBVORBIS_VERSION}.tar.gz
+    tar -xzf libvorbis-${LIBVORBIS_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/libvorbis-${LIBVORBIS_VERSION}"
 fi
@@ -134,7 +134,7 @@ fi
 # if [ ! -d "libvpx-${LIBVPX_VERSION}" ]; then
 #     echo "Downloading libvpx-${LIBVPX_VERSION}"
 #     curl -LO http://storage.googleapis.com/downloads.webmproject.org/releases/webm/libvpx-${LIBVPX_VERSION}.tar.bz2
-#     tar -xvf libvpx-${LIBVPX_VERSION}.tar.bz2
+#     tar -xf libvpx-${LIBVPX_VERSION}.tar.bz2
 # else
 #     echo "Using existing `pwd`/libvpx-${LIBVPX_VERSION}"
 # fi

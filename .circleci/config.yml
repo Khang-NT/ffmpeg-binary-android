@@ -3,9 +3,11 @@ version: 2
 defaults: &defaults
   working_directory: ~/source
   docker:
-    - image: vnkhangnt/buildpack-deps:trusty
+      - image: vnkhangnt/buildpack-deps:trusty
   steps:
-      - run: git clone https://github.com/Khang-NT/ffmpeg-binary-android.git ~/source --depth=1
+      - run: 
+          name: Checkout
+          command: git clone https://github.com/Khang-NT/ffmpeg-binary-android.git ~/source --depth=1
       - run:
           name: Compile FFmpeg
           command: |
@@ -21,7 +23,6 @@ defaults: &defaults
           paths:
             - $TARGET/full
             - $TARGET/lite
-  
 
 jobs:
   build_arm:
@@ -67,7 +68,6 @@ jobs:
       - attach_workspace:
           at: artifacts
       - run: ls artifacts/
-
 
 workflows:
   version: 2

@@ -143,6 +143,15 @@ fi
 
 function build_one
 {
+
+pushd yasm-${YASM_VERSION}
+./configure --prefix=$PREFIX 
+
+# make clean
+make -j8
+make install
+popd
+
 if [ $ARCH == "native" ]
 then
     SYSROOT=$NATIVE_SYSROOT
@@ -198,14 +207,6 @@ export CXXFLAGS="$CFLAGS "
 export CPPFLAGS="--sysroot=$SYSROOT "
 export STRIP=${CROSS_PREFIX}strip
 export PATH="$PATH:$PREFIX/bin/"
-
-pushd yasm-${YASM_VERSION}
-./configure --prefix=$PREFIX 
-
-make clean
-make -j8
-make install
-popd
 
 pushd x264
 ./configure \

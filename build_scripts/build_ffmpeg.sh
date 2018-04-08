@@ -208,23 +208,24 @@ export CPPFLAGS="--sysroot=$SYSROOT "
 export STRIP=${CROSS_PREFIX}strip
 export PATH="$PATH:$PREFIX/bin/"
 
-pushd x264
-./configure \
-    --cross-prefix=$CROSS_PREFIX \
-    --sysroot=$SYSROOT \
-    --host=$HOST \
-    --enable-pic \
-    --enable-static \
-    --disable-shared \
-    --disable-cli \
-    --disable-opencl \
-    --disable-asm \
-    --prefix=$PREFIX
+# TODO: fix build failed
+# pushd x264
+# ./configure \
+#     --cross-prefix=$CROSS_PREFIX \
+#     --sysroot=$SYSROOT \
+#     --host=$HOST \
+#     --enable-pic \
+#     --enable-static \
+#     --disable-shared \
+#     --disable-cli \
+#     --disable-opencl \
+#     --disable-asm \
+#     --prefix=$PREFIX
 
-make clean
-make -j8
-make install
-popd
+# make clean
+# make -j8
+# make install
+# popd
 
 pushd opus-${OPUS_VERSION}
 ./configure \
@@ -345,7 +346,6 @@ fi
     --enable-libmp3lame \
     --enable-libopus \
     --enable-libvorbis \
-    --enable-libx264 \
     --enable-libfdk-aac \
     --enable-bsf=aac_adtstoasc \
     \

@@ -1,0 +1,85 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/source
+  docker:
+    - image: vnkhangnt/buildpack-deps:trusty
+  steps:
+      - checkout
+      - run:
+          name: Compile FFmpeg
+          command: |
+            mkdir -p build_dir;
+            mkdir -p artifacts/$TARGET;
+            cd build_dir && ./build_ffmpeg.sh $TARGET $(pwd) ../artifacts/$TARGET;
+      # - run: todo: copy log files
+      #     name: Copy error report
+      #     command: 
+      #     when: on_fail
+      - persist_to_workspace:
+          root: artifacts
+          paths:
+            - $TARGET/full
+            - $TARGET/lite
+  
+
+jobs:
+  build_arm:
+    environment:
+      TARGET: arm
+    << : *defaults
+  build_arm_v7a:
+    environment:
+      TARGET: armv7-a
+    << : *defaults
+  build_arm_v7a_neon:
+    environment:
+      TARGET: arm-v7n
+    << : *defaults
+  build_arm_v8a:
+    environment:
+      TARGET: arm64-v8a
+    << : *defaults
+  build_arm_x86:
+    environment:
+      TARGET: i686
+    << : *defaults
+  build_arm_x86_64:
+    environment:
+      TARGET: x86_64
+    << : *defaults
+  build_native_linux:
+    environment:
+      TARGET: native
+    << : *defaults
+
+  create_release:
+    working_directory: ~/source
+    - attach_workspace:
+      at: artifacts
+    - run: ls artifacts/
+
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build_arm
+      - build_arm_v7a
+      - build_arm_v7a_neon
+      - build_arm_v8a
+      - build_arm_x86
+      - build_arm_x86_64
+      - build_native_linux
+      - create_release:
+        requires:
+          - build_arm
+          - build_arm_v7a
+          - build_arm_v7a_neon
+          - build_arm_v8a
+          - build_arm_x86
+          - build_arm_x86_64
+          - build_native_linux
+        filters:
+            branches:
+              only: master

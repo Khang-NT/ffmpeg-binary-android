@@ -152,6 +152,7 @@ then
     SYSROOT=$ARM_SYSROOT
     HOST=arm-linux-androideabi
     CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
+    OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\)"
 #added by alexvas
 elif [ $ARCH == "arm64" ]
 then
@@ -191,7 +192,7 @@ export AR="${CROSS_PREFIX}ar"
 export NM="${CROSS_PREFIX}nm"
 export RANLIB="${CROSS_PREFIX}ranlib"
 export LDFLAGS="-L$PREFIX/lib -fPIE -pie "
-export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$SYSROOT -fPIE -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\) "
+export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$SYSROOT -fPIE "
 export CXXFLAGS="$CFLAGS "
 export CPPFLAGS="--sysroot=$SYSROOT "
 export STRIP=${CROSS_PREFIX}strip
@@ -215,6 +216,7 @@ pushd x264
     --disable-shared \
     --disable-cli \
     --disable-opencl \
+    --disable-asm \
     --prefix=$PREFIX
 
 make clean
@@ -312,11 +314,11 @@ if [ $ARCH == "native" ]
 then
     CROSS_COMPILE_FLAGS=
 else 
-    CROSS_COMPILE_FLAGS=--target-os=$TARGET_OS \
+    CROSS_COMPILE_FLAGS="--target-os=$TARGET_OS \
         --arch=$ARCH \
         --cross-prefix=$CROSS_PREFIX \
         --enable-cross-compile \
-        --sysroot=$SYSROOT
+        --sysroot=$SYSROOT"
 fi
 
 # Build - FULL version

@@ -49,7 +49,7 @@ X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
 # MIPS64_CROSS_PREFIX=$MIPS64_PREBUILT/bin/$HOST-
 
 if [ "$FFMPEG_VERSION" = "" ]; then
-    FFMPEG_VERSION="3.4.2"
+    FFMPEG_VERSION="3.3.2"
 fi
 if [ ! -d "ffmpeg-${FFMPEG_VERSION}" ]; then
     echo "Downloading ffmpeg-${FFMPEG_VERSION}.tar.bz2"

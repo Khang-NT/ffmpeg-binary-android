@@ -5,7 +5,7 @@ defaults: &defaults
   docker:
       - image: vnkhangnt/buildpack-deps:trusty
         environment:
-          FFMPEG_VERSION: 3.4.2
+          FFMPEG_VERSION: 3.3.2
   steps:
       - checkout
       - run:
@@ -19,7 +19,7 @@ defaults: &defaults
           name: Copy error report
           command: |
             mkdir -p build_logs/ffmpeg; 
-            cp build_scripts/ffmpeg-$FFMPEG_VERSION/ffbuild/config.log build_logs/ffmpeg/ || true;
+            cp build_scripts/ffmpeg-$FFMPEG_VERSION/config.log build_logs/ffmpeg/ || true;
           when: on_fail
       - store_artifacts:
           path: build_logs

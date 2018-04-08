@@ -387,8 +387,8 @@ cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/full/
     \
     --disable-encoders \
     --disable-decoders \
-    --enable-encoder='aac,dnxhd,flac,flv,gif,libmp3lame,libopus,libshine,libvorbis,mpeg4,png,srt,subrip,webvtt' \
-    --enable-decoder='aac,aac_at,aac_fixed,aac_latm,dnxhd,flac,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,libvorbis,mp3,mpeg4,wavpack,png,pcm_s16le,pcm_s16be,rawvideo,srt,webvtt' \
+    --enable-encoder='aac,dnxhd,flac,flv,gif,libmp3lame,libopus,libshine,libvorbis,mpeg4,png,mjpeg,srt,subrip,webvtt' \
+    --enable-decoder='aac,aac_at,aac_fixed,aac_latm,dnxhd,flac,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,libvorbis,mp3,mpeg4,wavpack,png,mjpeg,pcm_s16le,pcm_s16be,rawvideo,srt,webvtt' \
     \
     --enable-libshine \
     --enable-libmp3lame \

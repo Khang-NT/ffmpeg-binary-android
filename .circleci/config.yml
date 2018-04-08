@@ -14,7 +14,7 @@ defaults: &defaults
             mkdir -p build_logs;
             mkdir -p artifacts/$TARGET;
             mkdir -p build_scripts/build_dir
-            cd build_scripts && ./build_ffmpeg.sh $TARGET $(pwd)/build_dir ../artifacts/$TARGET;
+            cd build_scripts && ./build_ffmpeg.sh $TARGET $(pwd)/build_dir $(pwd)/../artifacts/$TARGET;
       - run: 
           name: Copy error report
           command: |

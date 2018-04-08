@@ -74,9 +74,9 @@ jobs:
       - run: 
           name: Create Github Release
           command: |
-            export UPLOAD_FOLDER="uploads" && mkdir -p $UPLOAD_FOLDER;
+            export UPLOAD_FOLDER="$(pwd)/uploads" && mkdir -p $UPLOAD_FOLDER;
             cd artifacts;
-            for f in ./*; do 
+            for f in *; do 
               tar -cjf $UPLOAD_FOLDER/$f-full.tar.bz2 -C $f/full .;
               tar -cjf $UPLOAD_FOLDER/$f-lite.tar.bz2 -C $f/lite .;
             done;

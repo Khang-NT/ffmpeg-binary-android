@@ -81,12 +81,12 @@ workflows:
       - build_arm_x86_64
       - build_native_linux
       - create_release:
-        requires:
-          - build_arm
-          - build_arm_v7a
-          - build_arm_v7a_neon
-          - build_arm_v8a
-          - build_arm_x86
-          - build_arm_x86_64
-          - build_native_linux
+          requires:
+            - build_arm
+            - build_arm_v7a
+            - build_arm_v7a_neon
+            - build_arm_v8a
+            - build_arm_x86
+            - build_arm_x86_64
+            - build_native_linux
 

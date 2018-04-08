@@ -11,9 +11,9 @@ defaults: &defaults
       - run:
           name: Compile FFmpeg
           command: |
-            mkdir -p build_dir;
             mkdir -p artifacts/$TARGET;
-            cd build_dir && ./build_ffmpeg.sh $TARGET $(pwd) ../artifacts/$TARGET;
+            mkdir -p build_scripts/build_dir
+            cd build_scripts && ./build_ffmpeg.sh $TARGET build_dir ../artifacts/$TARGET;
       # - run: todo: copy log files
       #     name: Copy error report
       #     command: 
@@ -25,7 +25,7 @@ defaults: &defaults
             - $TARGET/lite
 
 jobs:
-  build:
+  build_arm:
     environment:
       TARGET: arm
     << : *defaults
@@ -73,7 +73,7 @@ workflows:
   version: 2
   build-and-create-release:
     jobs:
-      - build
+      - build_arm
       - build_arm_v7a
       - build_arm_v7a_neon
       - build_arm_v8a
@@ -82,13 +82,11 @@ workflows:
       - build_native_linux
       - create_release:
         requires:
-          - build
+          - build_arm
           - build_arm_v7a
           - build_arm_v7a_neon
           - build_arm_v8a
           - build_arm_x86
           - build_arm_x86_64
           - build_native_linux
-        # filters:
-        #     branches:
-        #       only: master
+

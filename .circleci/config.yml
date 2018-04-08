@@ -2,6 +2,8 @@ version: 2
 
 defaults: &defaults
   working_directory: ~/source
+  environment:
+      FFMPEG_VERSION: 3.4.2
   docker:
       - image: vnkhangnt/buildpack-deps:trusty
   steps:
@@ -9,13 +11,18 @@ defaults: &defaults
       - run:
           name: Compile FFmpeg
           command: |
+            mkdir -p build_logs;
             mkdir -p artifacts/$TARGET;
             mkdir -p build_scripts/build_dir
             cd build_scripts && ./build_ffmpeg.sh $TARGET $(pwd)/build_dir ../artifacts/$TARGET;
-      # - run: todo: copy log files
-      #     name: Copy error report
-      #     command: 
-      #     when: on_fail
+      - run: todo: copy log files
+          name: Copy error report
+          command: |
+            mkdir -p build_logs/ffmpeg; 
+            cp build_scripts/ffmpeg-$FFMPEG_VERSION/config.log build_logs/ffmpeg/;
+          when: on_fail
+      - store_artifacts:
+          path: build_logs
       - persist_to_workspace:
           root: artifacts
           paths:

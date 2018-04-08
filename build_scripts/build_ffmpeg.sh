@@ -48,8 +48,9 @@ X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
 # MIPS64_PREBUILT=$NDK/toolchains/mips64el-linux-android-4.9/prebuilt/darwin-x86_64
 # MIPS64_CROSS_PREFIX=$MIPS64_PREBUILT/bin/$HOST-
 
-
-FFMPEG_VERSION="3.4.2"
+if [ "$FFMPEG_VERSION" = "" ]; then
+    FFMPEG_VERSION="3.4.2"
+fi
 if [ ! -d "ffmpeg-${FFMPEG_VERSION}" ]; then
     echo "Downloading ffmpeg-${FFMPEG_VERSION}.tar.bz2"
     curl -LO http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2

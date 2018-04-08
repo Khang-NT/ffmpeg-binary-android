@@ -4,8 +4,8 @@ defaults: &defaults
   working_directory: ~/source
   docker:
       - image: vnkhangnt/buildpack-deps:trusty
-          environment:
-            FFMPEG_VERSION: 3.4.2
+        environment:
+          FFMPEG_VERSION: 3.4.2
   steps:
       - checkout
       - run:

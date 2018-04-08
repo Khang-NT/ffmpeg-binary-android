@@ -26,7 +26,7 @@ defaults: &defaults
       - persist_to_workspace:
           root: artifacts
           paths:
-            - $TARGET
+            - $TARGET/*
 
 jobs:
   build_arm:

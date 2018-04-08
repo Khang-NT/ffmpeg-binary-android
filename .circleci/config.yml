@@ -28,41 +28,50 @@ jobs:
     environment:
       TARGET: arm
     << : *defaults
+
   build_arm_v7a:
     environment:
       TARGET: armv7-a
     << : *defaults
+
   build_arm_v7a_neon:
     environment:
       TARGET: arm-v7n
     << : *defaults
+
   build_arm_v8a:
     environment:
       TARGET: arm64-v8a
     << : *defaults
+
   build_arm_x86:
     environment:
       TARGET: i686
     << : *defaults
+
   build_arm_x86_64:
     environment:
       TARGET: x86_64
     << : *defaults
+
   build_native_linux:
     environment:
       TARGET: native
     << : *defaults
 
   create_release:
+    docker:
+      - image: vnkhangnt/buildpack-deps:trusty
     working_directory: ~/source
-    - attach_workspace:
-      at: artifacts
-    - run: ls artifacts/
+    steps:
+      - attach_workspace:
+          at: artifacts
+      - run: ls artifacts/
 
 
 workflows:
   version: 2
-  commit:
+  build_and_create_release:
     jobs:
       - build_arm
       - build_arm_v7a

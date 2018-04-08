@@ -196,10 +196,10 @@ export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$SYSROOT -fPIE "
 export CXXFLAGS="$CFLAGS "
 export CPPFLAGS="--sysroot=$SYSROOT "
 export STRIP=${CROSS_PREFIX}strip
+export PATH="$PATH:$PREFIX/bin/"
 
 pushd yasm-${YASM_VERSION}
-./configure --prefix=$PREFIX \
-    --host=$HOST
+./configure --prefix=$PREFIX 
 
 make clean
 make -j8

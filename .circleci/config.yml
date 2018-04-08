@@ -5,9 +5,7 @@ defaults: &defaults
   docker:
       - image: vnkhangnt/buildpack-deps:trusty
   steps:
-      - run: 
-          name: Checkout
-          command: git clone -b $CIRCLE_BRANCH https://github.com/Khang-NT/ffmpeg-binary-android.git ~/source --depth=1
+      - checkout
       - run:
           name: Compile FFmpeg
           command: |

@@ -26,7 +26,8 @@ defaults: &defaults
       - persist_to_workspace:
           root: artifacts
           paths:
-            - $TARGET/*
+            - $TARGET/full/ffmpeg
+            - $TARGET/lite/ffmpeg
 
 jobs:
   build_arm:

@@ -71,7 +71,26 @@ jobs:
     steps:
       - attach_workspace:
           at: artifacts
-      - run: ls artifacts/
+      - run: 
+          name: Create Github Release
+          command: |
+            export UPLOAD_FOLDER="uploads" && mkdir -p $UPLOAD_FOLDER;
+            cd artifacts;
+            for f in ./*; do 
+              tar -cjf $UPLOAD_FOLDER/$f-full.tar.bz2 -C $f/full .;
+              tar -cjf $UPLOAD_FOLDER/$f-lite.tar.bz2 -C $f/lite .;
+            done;
+            curl -L -O 'https://github.com/tcnksm/ghr/releases/download/v0.5.4/ghr_v0.5.4_linux_amd64.zip';
+            unzip ghr_v0.5.4_linux_amd64.zip -d .;
+            sudo chmod +x ghr;
+            TAG=`date +%Y-%m-%d`;
+            ./ghr \
+              -t "$GITHUB_TOKEN" \
+              -u 'Khang-NT' \
+              -r 'ffmpeg-binary-android' \
+              -c "$CIRCLE_SHA1" \
+              -delete \
+              "$TAG" $UPLOAD_FOLDER
 
 workflows:
   version: 2
@@ -93,4 +112,8 @@ workflows:
             - build_arm_x86
             - build_arm_x86_64
             - build_native_linux
+          filters:
+            branches:
+              only: master
+
 

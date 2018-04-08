@@ -15,7 +15,7 @@ defaults: &defaults
             mkdir -p artifacts/$TARGET;
             mkdir -p build_scripts/build_dir
             cd build_scripts && ./build_ffmpeg.sh $TARGET $(pwd)/build_dir ../artifacts/$TARGET;
-      - run: todo: copy log files
+      - run: 
           name: Copy error report
           command: |
             mkdir -p build_logs/ffmpeg; 

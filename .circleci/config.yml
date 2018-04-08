@@ -1,0 +1,119 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/source
+  docker:
+      - image: vnkhangnt/buildpack-deps:trusty
+        environment:
+          FFMPEG_VERSION: 3.3.2
+  steps:
+      - checkout
+      - run:
+          name: Compile FFmpeg
+          command: |
+            mkdir -p build_logs;
+            export FINAL_DIR=$(pwd)/artifacts/$TARGET;
+            export BUILD_DIR=$(pwd)/build_scripts/build_dir && mkdir -p $BUILD_DIR;
+            ./build_scripts/build_ffmpeg.sh $TARGET $BUILD_DIR $FINAL_DIR;
+      - run: 
+          name: Copy error report
+          command: |
+            mkdir -p build_logs/ffmpeg; 
+            cp build_scripts/ffmpeg-$FFMPEG_VERSION/config.log build_logs/ffmpeg/ || true;
+          when: on_fail
+      - store_artifacts:
+          path: build_logs
+      - persist_to_workspace:
+          root: artifacts
+          paths:
+            - "*/*/ffmpeg"
+
+jobs:
+  build_arm:
+    environment:
+      TARGET: arm
+    << : *defaults
+
+  build_arm_v7a:
+    environment:
+      TARGET: armv7-a
+    << : *defaults
+
+  build_arm_v7a_neon:
+    environment:
+      TARGET: arm-v7n
+    << : *defaults
+
+  build_arm_v8a:
+    environment:
+      TARGET: arm64-v8a
+    << : *defaults
+
+  build_arm_x86:
+    environment:
+      TARGET: i686
+    << : *defaults
+
+  build_arm_x86_64:
+    environment:
+      TARGET: x86_64
+    << : *defaults
+
+  build_native_linux:
+    environment:
+      TARGET: native
+    << : *defaults
+
+  create_release:
+    docker:
+      - image: vnkhangnt/buildpack-deps:trusty
+    working_directory: ~/source
+    steps:
+      - attach_workspace:
+          at: artifacts
+      - run: 
+          name: Create Github Release
+          command: |
+            export UPLOAD_FOLDER="uploads" && mkdir -p $UPLOAD_FOLDER;
+            cd artifacts;
+            for f in ./*; do 
+              tar -cjf $UPLOAD_FOLDER/$f-full.tar.bz2 -C $f/full .;
+              tar -cjf $UPLOAD_FOLDER/$f-lite.tar.bz2 -C $f/lite .;
+            done;
+            curl -L -O 'https://github.com/tcnksm/ghr/releases/download/v0.5.4/ghr_v0.5.4_linux_amd64.zip';
+            unzip ghr_v0.5.4_linux_amd64.zip -d .;
+            sudo chmod +x ghr;
+            TAG=`date +%Y-%m-%d`;
+            ./ghr \
+              -t "$GITHUB_TOKEN" \
+              -u 'Khang-NT' \
+              -r 'ffmpeg-binary-android' \
+              -c "$CIRCLE_SHA1" \
+              -delete \
+              "$TAG" $UPLOAD_FOLDER
+
+workflows:
+  version: 2
+  build-and-create-release:
+    jobs:
+      - build_arm
+      - build_arm_v7a
+      - build_arm_v7a_neon
+      - build_arm_v8a
+      - build_arm_x86
+      - build_arm_x86_64
+      - build_native_linux
+      - create_release:
+          requires:
+            - build_arm
+            - build_arm_v7a
+            - build_arm_v7a_neon
+            - build_arm_v8a
+            - build_arm_x86
+            - build_arm_x86_64
+            - build_native_linux
+          filters:
+            branches:
+              only: master
+
+

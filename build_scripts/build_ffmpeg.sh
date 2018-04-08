@@ -1,36 +1,61 @@
 #!/bin/bash
 
+## $1: target
+## $2: build dir (prefix)
+## $3: destination directory where ffmpeg binary will copy to
+
 set -e
 set -x
 
+## Support either NDK linux or darwin (mac os)
+## Check $NDK exists
+if [ "$NDK" = "" ] || [ ! -d $NDK ]; then
+	echo "NDK variable not set or path to NDK is invalid, exiting..."
+	exit 1
+fi
+
 export TARGET=$1
 export PREFIX=$2
+export DESTINATION_FOLDER=$3
 
-ARM_PLATFORM=$NDK/platforms/android-16/arch-arm/
-ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64
+if [ "$(uname)" == "Darwin" ]; then
+    OS="darwin-x86_64"
+else
+    OS="linux-x86_64"
+fi
 
-ARM64_PLATFORM=$NDK/platforms/android-21/arch-arm64/
-ARM64_PREBUILT=$NDK/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64
+NATIVE_SYSROOT=/
 
-X86_PLATFORM=$NDK/platforms/android-16/arch-x86/
-X86_PREBUILT=$NDK/toolchains/x86-4.9/prebuilt/darwin-x86_64
+ARM_SYSROOT=$NDK/platforms/android-16/arch-arm/
+ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/$OS
 
-X86_64_PLATFORM=$NDK/platforms/android-21/arch-x86_64/
-X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/darwin-x86_64
+ARM64_SYSROOT=$NDK/platforms/android-21/arch-arm64/
+ARM64_PREBUILT=$NDK/toolchains/aarch64-linux-android-4.9/prebuilt/$OS
 
-MIPS_PLATFORM=$NDK/platforms/android-16/arch-mips/
-MIPS_PREBUILT=$NDK/toolchains/mipsel-linux-android-4.9/prebuilt/darwin-x86_64
+X86_SYSROOT=$NDK/platforms/android-16/arch-x86/
+X86_PREBUILT=$NDK/toolchains/x86-4.9/prebuilt/$OS
 
-MIPS64_PLATFORM=$NDK/platforms/android-21/arch-mips64/
-MIPS64_PREBUILT=$NDK/toolchains/mips64el-linux-android-4.9/prebuilt/darwin-x86_64
+X86_64_SYSROOT=$NDK/platforms/android-21/arch-x86_64/
+X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
 
+## No longer support MIPS MIPS64
 
-FFMPEG_VERSION="3.3.2"
+# MIPS_SYSROOT=$NDK/platforms/android-16/arch-mips/
+# MIPS_PREBUILT=$NDK/toolchains/mipsel-linux-android-4.9/prebuilt/darwin-x86_64
+# MIPS_CROSS_PREFIX=$MIPS_PREBUILT/bin/$HOST-
+
+# MIPS64_SYSROOT=$NDK/platforms/android-21/arch-mips64/
+# MIPS64_PREBUILT=$NDK/toolchains/mips64el-linux-android-4.9/prebuilt/darwin-x86_64
+# MIPS64_CROSS_PREFIX=$MIPS64_PREBUILT/bin/$HOST-
+
+if [ "$FFMPEG_VERSION" = "" ]; then
+    FFMPEG_VERSION="3.3.2"
+fi
 if [ ! -d "ffmpeg-${FFMPEG_VERSION}" ]; then
     echo "Downloading ffmpeg-${FFMPEG_VERSION}.tar.bz2"
     curl -LO http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2
     echo "extracting ffmpeg-${FFMPEG_VERSION}.tar.bz2"
-    tar -xvf ffmpeg-${FFMPEG_VERSION}.tar.bz2
+    tar -xf ffmpeg-${FFMPEG_VERSION}.tar.bz2
 else
     echo "Using existing `pwd`/ffmpeg-${FFMPEG_VERSION}"
 fi
@@ -39,42 +64,42 @@ YASM_VERSION="1.3.0"
 if [ ! -d "yasm-${YASM_VERSION}" ]; then
     echo "Downloading yasm-${YASM_VERSION}"
     curl -O "http://www.tortall.net/projects/yasm/releases/yasm-${YASM_VERSION}.tar.gz"
-    tar -xvzf "yasm-${YASM_VERSION}.tar.gz"
+    tar -xzf "yasm-${YASM_VERSION}.tar.gz"
 else
     echo "Using existing `pwd`/yasm-${YASM_VERSION}"
 fi
 
-# if [ ! -d "x264" ]; then
-#     echo "Cloning x264"
-#     git clone --depth=1 git://git.videolan.org/x264.git x264
-# else
-#     echo "Using existing `pwd`/x264"
-# fi
+if [ ! -d "x264" ]; then
+    echo "Cloning x264"
+    git clone --depth=1 git://git.videolan.org/x264.git x264
+else
+    echo "Using existing `pwd`/x264"
+fi
 
 OPUS_VERSION="1.1.5"
 if [ ! -d "opus-${OPUS_VERSION}" ]; then
     echo "Downloading opus-${OPUS_VERSION}"
     curl -LO https://archive.mozilla.org/pub/opus/opus-${OPUS_VERSION}.tar.gz
-    tar -xvzf opus-${OPUS_VERSION}.tar.gz
+    tar -xzf opus-${OPUS_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/opus-${OPUS_VERSION}"
 fi
 
-# FDK_AAC_VERSION="0.1.5"
-# if [ ! -d "fdk-aac-${FDK_AAC_VERSION}" ]; then
-#     echo "Downloading fdk-aac-${FDK_AAC_VERSION}"
-#     curl -LO http://downloads.sourceforge.net/opencore-amr/fdk-aac-${FDK_AAC_VERSION}.tar.gz
-#     tar -xvzf fdk-aac-${FDK_AAC_VERSION}.tar.gz
-# else
-#     echo "Using existing `pwd`/fdk-aac-${FDK_AAC_VERSION}"
-# fi
+FDK_AAC_VERSION="0.1.5"
+if [ ! -d "fdk-aac-${FDK_AAC_VERSION}" ]; then
+    echo "Downloading fdk-aac-${FDK_AAC_VERSION}"
+    curl -LO http://downloads.sourceforge.net/opencore-amr/fdk-aac-${FDK_AAC_VERSION}.tar.gz
+    tar -xzf fdk-aac-${FDK_AAC_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/fdk-aac-${FDK_AAC_VERSION}"
+fi
 
 LAME_MAJOR="3.99"
 LAME_VERSION="3.99.5"
 if [ ! -d "lame-${LAME_VERSION}" ]; then
     echo "Downloading lame-${LAME_VERSION}"
     curl -LO http://downloads.sourceforge.net/project/lame/lame/${LAME_MAJOR}/lame-${LAME_VERSION}.tar.gz
-    tar -xvzf lame-${LAME_VERSION}.tar.gz
+    tar -xzf lame-${LAME_VERSION}.tar.gz
     curl -L -o lame-${LAME_VERSION}/config.guess "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
     curl -L -o lame-${LAME_VERSION}/config.sub "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD"
 else
@@ -92,7 +117,7 @@ LIBOGG_VERSION="1.3.2"
 if [ ! -d "libogg-${LIBOGG_VERSION}" ]; then
     echo "Downloading libogg-${LIBOGG_VERSION}"
     curl -LO http://downloads.xiph.org/releases/ogg/libogg-${LIBOGG_VERSION}.tar.gz
-    tar -xvzf libogg-${LIBOGG_VERSION}.tar.gz
+    tar -xzf libogg-${LIBOGG_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/libogg-${LIBOGG_VERSION}"
 fi
@@ -101,7 +126,7 @@ LIBVORBIS_VERSION="1.3.4"
 if [ ! -d "libvorbis-${LIBVORBIS_VERSION}" ]; then
     echo "Downloading libvorbis-${LIBVORBIS_VERSION}"
     curl -LO http://downloads.xiph.org/releases/vorbis/libvorbis-${LIBVORBIS_VERSION}.tar.gz
-    tar -xvzf libvorbis-${LIBVORBIS_VERSION}.tar.gz
+    tar -xzf libvorbis-${LIBVORBIS_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/libvorbis-${LIBVORBIS_VERSION}"
 fi
@@ -110,7 +135,7 @@ fi
 # if [ ! -d "libvpx-${LIBVPX_VERSION}" ]; then
 #     echo "Downloading libvpx-${LIBVPX_VERSION}"
 #     curl -LO http://storage.googleapis.com/downloads.webmproject.org/releases/webm/libvpx-${LIBVPX_VERSION}.tar.bz2
-#     tar -xvf libvpx-${LIBVPX_VERSION}.tar.bz2
+#     tar -xf libvpx-${LIBVPX_VERSION}.tar.bz2
 # else
 #     echo "Using existing `pwd`/libvpx-${LIBVPX_VERSION}"
 # fi
@@ -118,37 +143,54 @@ fi
 
 function build_one
 {
-if [ $ARCH == "arm" ]
+
+pushd yasm-${YASM_VERSION}
+./configure --prefix=$PREFIX 
+
+# make clean
+make -j8
+make install
+popd
+
+if [ $ARCH == "native" ]
 then
-    PLATFORM=$ARM_PLATFORM
+    SYSROOT=$NATIVE_SYSROOT
+    HOST=
+    CROSS_PREFIX=
+elif [ $ARCH == "arm" ]
+then
+    SYSROOT=$ARM_SYSROOT
     HOST=arm-linux-androideabi
-    export CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
+    CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
+    OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\)"
 #added by alexvas
 elif [ $ARCH == "arm64" ]
 then
-    PLATFORM=$ARM64_PLATFORM
+    SYSROOT=$ARM64_SYSROOT
     HOST=aarch64-linux-android
-    export CROSS_PREFIX=$ARM64_PREBUILT/bin/$HOST-
-elif [ $ARCH == "mips" ]
-then
-    PLATFORM=$MIPS_PLATFORM
-    HOST=mipsel-linux-android
-    export CROSS_PREFIX=$MIPS_PREBUILT/bin/$HOST-
-elif [ $ARCH == "mips64" ]
-then
-    PLATFORM=$MIPS64_PLATFORM
-    HOST=mips64el-linux-android
-    export CROSS_PREFIX=$MIPS64_PREBUILT/bin/$HOST-
+    CROSS_PREFIX=$ARM64_PREBUILT/bin/$HOST-
 elif [ $ARCH == "x86_64" ]
 then
-    PLATFORM=$X86_64_PLATFORM
+    SYSROOT=$X86_64_SYSROOT
     HOST=x86_64-linux-android
-    export CROSS_PREFIX=$X86_64_PREBUILT/bin/$HOST-
+    CROSS_PREFIX=$X86_64_PREBUILT/bin/$HOST-
 elif [ $ARCH == "i686" ]
 then
-    PLATFORM=$X86_PLATFORM
+    SYSROOT=$X86_SYSROOT
     HOST=i686-linux-android
-    export CROSS_PREFIX=$X86_PREBUILT/bin/$HOST-
+    CROSS_PREFIX=$X86_PREBUILT/bin/$HOST-
+
+# elif [ $ARCH == "mips" ]
+# then
+#     SYSROOT=$MIPS_SYSROOT
+#     HOST=mipsel-linux-android
+#     CROSS_PREFIX=$MIPS_CROSS_PREFIX
+# elif [ $ARCH == "mips64" ]
+# then
+#     SYSROOT=$MIPS64_SYSROOT
+#     HOST=mips64el-linux-android
+#     CROSS_PREFIX=$MIPS64_CROSS_PREFIX
+
 fi
 
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
@@ -160,30 +202,26 @@ export AR="${CROSS_PREFIX}ar"
 export NM="${CROSS_PREFIX}nm"
 export RANLIB="${CROSS_PREFIX}ranlib"
 export LDFLAGS="-L$PREFIX/lib -fPIE -pie "
-export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$PLATFORM -fPIE -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\) "
+export CFLAGS="$OPTIMIZE_CFLAGS -I$PREFIX/include --sysroot=$SYSROOT -fPIE "
 export CXXFLAGS="$CFLAGS "
-export CPPFLAGS="--sysroot=$PLATFORM "
+export CPPFLAGS="--sysroot=$SYSROOT "
 export STRIP=${CROSS_PREFIX}strip
+export PATH="$PATH:$PREFIX/bin/"
 
-pushd yasm-${YASM_VERSION}
-./configure --prefix=$PREFIX \
-    --host=$HOST
-make clean
-make -j8
-make install
-popd
-
+# TODO: fix build failed
 # pushd x264
 # ./configure \
 #     --cross-prefix=$CROSS_PREFIX \
-#     --sysroot=$PLATFORM \
+#     --sysroot=$SYSROOT \
 #     --host=$HOST \
 #     --enable-pic \
 #     --enable-static \
 #     --disable-shared \
 #     --disable-cli \
 #     --disable-opencl \
+#     --disable-asm \
 #     --prefix=$PREFIX
+
 # make clean
 # make -j8
 # make install
@@ -205,17 +243,18 @@ popd
 
 
 # Non-free
-# pushd fdk-aac-${FDK_AAC_VERSION}
-# ./configure \
-#     --prefix=$PREFIX \
-#     --host=$HOST \
-#     --enable-static \
-#     --disable-shared \
-#     --with-sysroot=$PLATFORM
-# make clean
-# make -j8
-# make install
-# popd
+pushd fdk-aac-${FDK_AAC_VERSION}
+./configure \
+    --prefix=$PREFIX \
+    --host=$HOST \
+    --enable-static \
+    --disable-shared \
+    --with-sysroot=$SYSROOT
+
+make clean
+make -j8
+make install
+popd
 
 pushd lame-${LAME_VERSION}
 ./configure \
@@ -248,7 +287,8 @@ pushd libogg-${LIBOGG_VERSION}
     --host=$HOST \
     --enable-static \
     --disable-shared \
-    --with-sysroot=$PLATFORM
+    --with-sysroot=$SYSROOT
+
 make clean
 make -j8
 make install
@@ -260,8 +300,9 @@ pushd libvorbis-${LIBVORBIS_VERSION}
     --host=$HOST \
     --enable-static \
     --disable-shared \
-    --with-sysroot=$PLATFORM \
+    --with-sysroot=$SYSROOT \
     --with-ogg=$PREFIX
+
 make clean
 make -j8
 make install
@@ -270,14 +311,58 @@ popd
 # (wget --no-check-certificate https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/master/gas-preprocessor.pl && \
 #     chmod +x gas-preprocessor.pl && \
 #     sudo mv gas-preprocessor.pl /usr/bin) || exit 1
-
 pushd ffmpeg-$FFMPEG_VERSION
+
+if [ $ARCH == "native" ] 
+then
+    CROSS_COMPILE_FLAGS=
+else 
+    CROSS_COMPILE_FLAGS="--target-os=linux \
+        --arch=$ARCH \
+        --cross-prefix=$CROSS_PREFIX \
+        --enable-cross-compile \
+        --sysroot=$SYSROOT"
+fi
+
+# Build - FULL version
 ./configure --prefix=$PREFIX \
-    --target-os=linux \
-    --arch=$ARCH \
-    --cross-prefix=$CROSS_PREFIX \
-    --enable-cross-compile \
-    --sysroot=$PLATFORM \
+    $CROSS_COMPILE_FLAGS \
+    --pkg-config=$(which pkg-config) \
+    --pkg-config-flags="--static" \
+    --enable-pic \
+    --enable-small \
+    --enable-gpl \
+    --enable-nonfree \
+    \
+    --disable-shared \
+    --enable-static \
+    \
+    --enable-ffmpeg \
+    --disable-ffplay \
+    --disable-ffprobe \
+    --disable-ffserver \
+    \
+    --enable-libshine \
+    --enable-libmp3lame \
+    --enable-libopus \
+    --enable-libvorbis \
+    --enable-libfdk-aac \
+    --enable-bsf=aac_adtstoasc \
+    \
+    --disable-doc \
+    $ADDITIONAL_CONFIGURE_FLAG
+
+make clean
+make -j8
+make install V=1
+
+mkdir -p $DESTINATION_FOLDER/full/
+cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/full/
+
+
+# Build - LITE version
+./configure --prefix=$PREFIX \
+    $CROSS_COMPILE_FLAGS \
     --pkg-config=$(which pkg-config) \
     --pkg-config-flags="--static" \
     --enable-pic \
@@ -317,6 +402,10 @@ pushd ffmpeg-$FFMPEG_VERSION
 make clean
 make -j8
 make install V=1
+
+mkdir -p $DESTINATION_FOLDER/lite/
+cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/lite/
+
 popd
 }
 
@@ -401,7 +490,7 @@ elif [ $TARGET == 'mips64' ]; then
     ADDITIONAL_CONFIGURE_FLAG=
     build_one
 elif [ $TARGET == 'armv7-a' ]; then
-    #arm armv7-a
+    # armv7-a
     CPU=armv7-a
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -marm -march=$CPU -Os -O3 "
@@ -414,5 +503,15 @@ elif [ $TARGET == 'arm' ]; then
     OPTIMIZE_CFLAGS="-march=$CPU -Os -O3 "
     ADDITIONAL_CONFIGURE_FLAG=
     build_one
+elif [ $TARGET == 'native' ]; then
+    # host = current machine
+    CPU=x86-64
+    ARCH=native
+    OPTIMIZE_CFLAGS="-O2 -pipe -march=native"
+    ADDITIONAL_CONFIGURE_FLAG=
+    build_one
+else
+    echo "Unknown target: $TARGET"
+    exit 1
 fi
 

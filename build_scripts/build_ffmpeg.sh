@@ -308,14 +308,15 @@ popd
 #     sudo mv gas-preprocessor.pl /usr/bin) || exit 1
 pushd ffmpeg-$FFMPEG_VERSION
 
-if [ $ARCH == "native" ] then
+if [ $ARCH == "native" ] 
+then
     CROSS_COMPILE_FLAGS=
 else 
     CROSS_COMPILE_FLAGS=--target-os=$TARGET_OS \
         --arch=$ARCH \
         --cross-prefix=$CROSS_PREFIX \
         --enable-cross-compile \
-        --sysroot=$SYSROOT \
+        --sysroot=$SYSROOT
 fi
 
 # Build - FULL version
@@ -505,7 +506,7 @@ elif [ $TARGET == 'native' ]; then
     OPTIMIZE_CFLAGS="-O2 -pipe -march=native"
     ADDITIONAL_CONFIGURE_FLAG=
     build_one
-elif
+else
     echo "Unknown target: $TARGET"
     exit 1
 fi

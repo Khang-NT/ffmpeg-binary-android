@@ -15,8 +15,9 @@ if [ "$NDK" = "" ] || [ ! -d $NDK ]; then
 fi
 
 export TARGET=$1
-export PREFIX=$2
-export DESTINATION_FOLDER=$3
+export FLAVOR=$2
+export PREFIX=$3
+export DESTINATION_FOLDER=$4
 
 if [ "$(uname)" == "Darwin" ]; then
     OS="darwin-x86_64"
@@ -26,14 +27,20 @@ fi
 
 NATIVE_SYSROOT=/
 
-ARM_SYSROOT=$NDK/platforms/android-16/arch-arm/
+if [ "$FLAVOR" = "lite" ]; then 
+    # LITE flavor support android 16+
+    ARM_SYSROOT=$NDK/platforms/android-16/arch-arm/
+    X86_SYSROOT=$NDK/platforms/android-16/arch-x86/
+else 
+    # FULL flavor require android 21 at minimum (because of including openssl)
+    ARM_SYSROOT=$NDK/platforms/android-21/arch-arm/
+    X86_SYSROOT=$NDK/platforms/android-21/arch-x86/
+fi
 ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/$OS
+X86_PREBUILT=$NDK/toolchains/x86-4.9/prebuilt/$OS
 
 ARM64_SYSROOT=$NDK/platforms/android-21/arch-arm64/
 ARM64_PREBUILT=$NDK/toolchains/aarch64-linux-android-4.9/prebuilt/$OS
-
-X86_SYSROOT=$NDK/platforms/android-16/arch-x86/
-X86_PREBUILT=$NDK/toolchains/x86-4.9/prebuilt/$OS
 
 X86_64_SYSROOT=$NDK/platforms/android-21/arch-x86_64/
 X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
@@ -60,20 +67,13 @@ else
     echo "Using existing `pwd`/ffmpeg-${FFMPEG_VERSION}"
 fi
 
-YASM_VERSION="1.3.0"
-if [ ! -d "yasm-${YASM_VERSION}" ]; then
-    echo "Downloading yasm-${YASM_VERSION}"
-    curl -O "http://www.tortall.net/projects/yasm/releases/yasm-${YASM_VERSION}.tar.gz"
-    tar -xzf "yasm-${YASM_VERSION}.tar.gz"
+LIBX264_VERSION="snapshot-20171130-2245"
+if [ ! -d "x264-$LIBX264_VERSION" ]; then
+    echo "Downloading x264-$LIBX264_VERSION"
+    curl -O "ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-$LIBX264_VERSION.tar.bz2"
+    tar -xf "x264-$LIBX264_VERSION.tar.bz2"
 else
-    echo "Using existing `pwd`/yasm-${YASM_VERSION}"
-fi
-
-if [ ! -d "x264" ]; then
-    echo "Cloning x264"
-    git clone --depth=1 git://git.videolan.org/x264.git x264
-else
-    echo "Using existing `pwd`/x264"
+    echo "Using existing `pwd`/x264-$LIBX264_VERSION"
 fi
 
 OPUS_VERSION="1.1.5"
@@ -140,30 +140,48 @@ fi
 #     echo "Using existing `pwd`/libvpx-${LIBVPX_VERSION}"
 # fi
 
+# Download lib openssl prebuilt
+OPENSSL_PREBUILT_FOLDER="$(pwd)/openssl-prebuilt"
+if [ ! -d $OPENSSL_PREBUILT_FOLDER/android ]; then
+    curl -LO "https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/openssl-1.0.2k/openssl.1.0.2k_for_android_ios.zip"
+    mkdir -p $OPENSSL_PREBUILT_FOLDER && unzip -q "openssl.1.0.2k_for_android_ios.zip" -d $OPENSSL_PREBUILT_FOLDER
+fi
+
 
 function build_one
 {
 
-pushd yasm-${YASM_VERSION}
-./configure --prefix=$PREFIX 
-
-# make clean
-make -j8
-make install
-popd
+if [ "$(uname)" == "Darwin" ]; then
+    brew install yasm nasm
+else
+    # Install nasm >= 2.13 for libx264
+    if [ ! -d "nasm-2.13.03" ]; then
+        curl -LO 'http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/nasm-2.13.03.tar.xz'
+        tar -xf nasm-2.13.03.tar.xz
+    fi
+    pushd nasm-2.13.03
+        ./configure --prefix=/usr
+        make
+        sudo make install
+    popd
+fi
 
 if [ $ARCH == "native" ]
 then
     SYSROOT=$NATIVE_SYSROOT
     HOST=
     CROSS_PREFIX=
+    if [ "$(uname)" == "Darwin" ]; then
+        brew install openssl
+    else 
+        sudo apt-get install -y libssl-dev
+    fi
 elif [ $ARCH == "arm" ]
 then
     SYSROOT=$ARM_SYSROOT
     HOST=arm-linux-androideabi
     CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
-    OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\)"
-#added by alexvas
+    OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS "
 elif [ $ARCH == "arm64" ]
 then
     SYSROOT=$ARM64_SYSROOT
@@ -179,7 +197,6 @@ then
     SYSROOT=$X86_SYSROOT
     HOST=i686-linux-android
     CROSS_PREFIX=$X86_PREBUILT/bin/$HOST-
-
 # elif [ $ARCH == "mips" ]
 # then
 #     SYSROOT=$MIPS_SYSROOT
@@ -208,24 +225,40 @@ export CPPFLAGS="--sysroot=$SYSROOT "
 export STRIP=${CROSS_PREFIX}strip
 export PATH="$PATH:$PREFIX/bin/"
 
-# TODO: fix build failed
-# pushd x264
-# ./configure \
-#     --cross-prefix=$CROSS_PREFIX \
-#     --sysroot=$SYSROOT \
-#     --host=$HOST \
-#     --enable-pic \
-#     --enable-static \
-#     --disable-shared \
-#     --disable-cli \
-#     --disable-opencl \
-#     --disable-asm \
-#     --prefix=$PREFIX
+if [ "$FLAVOR" = "full" ]; then 
+    pushd x264-$LIBX264_VERSION
+        ./configure \
+            --cross-prefix=$CROSS_PREFIX \
+            --sysroot=$SYSROOT \
+            --host=$HOST \
+            --enable-pic \
+            --enable-static \
+            --disable-shared \
+            --disable-cli \
+            --disable-opencl \
+            --prefix=$PREFIX \
+            $LIBX264_FLAGS
 
-# make clean
-# make -j8
-# make install
-# popd
+        make clean
+        make -j8
+        make install
+    popd
+
+    # Non-free
+    pushd fdk-aac-${FDK_AAC_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --enable-static \
+            --disable-shared \
+            --with-sysroot=$SYSROOT
+
+        make clean
+        make -j8
+        make install
+    popd
+fi;
+
 
 pushd opus-${OPUS_VERSION}
 ./configure \
@@ -239,21 +272,6 @@ pushd opus-${OPUS_VERSION}
 make clean
 make -j8
 make install V=1
-popd
-
-
-# Non-free
-pushd fdk-aac-${FDK_AAC_VERSION}
-./configure \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --enable-static \
-    --disable-shared \
-    --with-sysroot=$SYSROOT
-
-make clean
-make -j8
-make install
 popd
 
 pushd lame-${LAME_VERSION}
@@ -324,132 +342,95 @@ else
         --sysroot=$SYSROOT"
 fi
 
-# Build - FULL version
-./configure --prefix=$PREFIX \
-    $CROSS_COMPILE_FLAGS \
-    --pkg-config=$(which pkg-config) \
-    --pkg-config-flags="--static" \
-    --enable-pic \
-    --enable-small \
-    --enable-gpl \
-    --enable-nonfree \
-    \
-    --disable-shared \
-    --enable-static \
-    \
-    --enable-ffmpeg \
-    --disable-ffplay \
-    --disable-ffprobe \
-    --disable-ffserver \
-    \
-    --enable-libshine \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libvorbis \
-    --enable-libfdk-aac \
-    --enable-bsf=aac_adtstoasc \
-    \
-    --disable-doc \
-    $ADDITIONAL_CONFIGURE_FLAG
+if [ "$FLAVOR" = "full" ]; then
+    # Build - FULL version
+    ./configure --prefix=$PREFIX \
+        $CROSS_COMPILE_FLAGS \
+        --pkg-config=$(which pkg-config) \
+        --pkg-config-flags="--static" \
+        --enable-pic \
+        --enable-small \
+        --enable-gpl \
+        --enable-nonfree \
+        \
+        --disable-shared \
+        --enable-static \
+        \
+        --enable-ffmpeg \
+        --disable-ffplay \
+        --disable-ffprobe \
+        --disable-ffserver \
+        \
+        --enable-libshine \
+        --enable-libmp3lame \
+        --enable-libopus \
+        --enable-libvorbis \
+        --enable-libx264 \
+        --enable-libfdk-aac \
+        --enable-bsf=aac_adtstoasc \
+        --enable-openssl \
+        \
+        --disable-doc \
+        $ADDITIONAL_CONFIGURE_FLAG
+else 
+    # Build - LITE version
+    ./configure --prefix=$PREFIX \
+        $CROSS_COMPILE_FLAGS \
+        --pkg-config=$(which pkg-config) \
+        --pkg-config-flags="--static" \
+        --enable-pic \
+        --enable-small \
+        --enable-gpl \
+        \
+        --disable-shared \
+        --enable-static \
+        \
+        --enable-ffmpeg \
+        --disable-ffplay \
+        --disable-ffprobe \
+        --disable-ffserver \
+        \
+        --disable-protocols \
+        --enable-protocol='file,pipe' \
+        \
+        --disable-demuxers \
+        --disable-muxers \
+        --enable-demuxer='aac,avi,dnxhd,flac,flv,gif,h261,h263,h264,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image2pipe,mjpeg' \
+        --enable-muxer='3gp,dnxhd,flac,flv,gif,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,opus,srt,wav,webvtt,ipod,gif,image2,image2pipe,mjpeg' \
+        \
+        --disable-encoders \
+        --disable-decoders \
+        --enable-encoder='aac,dnxhd,flac,flv,gif,libmp3lame,libopus,libshine,libvorbis,mpeg4,png,mjpeg,gif,srt,subrip,webvtt' \
+        --enable-decoder='aac,aac_at,aac_fixed,aac_latm,dnxhd,flac,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,libvorbis,mp3,mpeg4,wavpack,png,mjpeg,gif,pcm_s16le,pcm_s16be,rawvideo,srt,webvtt' \
+        \
+        --enable-libshine \
+        --enable-libmp3lame \
+        --enable-libopus \
+        --enable-libvorbis \
+        --enable-bsf=aac_adtstoasc \
+        \
+        --disable-doc \
+        $ADDITIONAL_CONFIGURE_FLAG
+fi;
 
 make clean
 make -j8
 make install V=1
 
-mkdir -p $DESTINATION_FOLDER/full/
-cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/full/
-
-
-# Build - LITE version
-./configure --prefix=$PREFIX \
-    $CROSS_COMPILE_FLAGS \
-    --pkg-config=$(which pkg-config) \
-    --pkg-config-flags="--static" \
-    --enable-pic \
-    --enable-small \
-    --enable-gpl \
-    \
-    --disable-shared \
-    --enable-static \
-    \
-    --enable-ffmpeg \
-    --disable-ffplay \
-    --disable-ffprobe \
-    --disable-ffserver \
-    \
-    --disable-protocols \
-    --enable-protocol='file,pipe' \
-    \
-    --disable-demuxers \
-    --disable-muxers \
-    --enable-demuxer='aac,avi,dnxhd,flac,flv,gif,h261,h263,h264,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image2pipe,mjpeg' \
-    --enable-muxer='3gp,dnxhd,flac,flv,gif,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,opus,srt,wav,webvtt,ipod,gif,image2,image2pipe,mjpeg' \
-    \
-    --disable-encoders \
-    --disable-decoders \
-    --enable-encoder='aac,dnxhd,flac,flv,gif,libmp3lame,libopus,libshine,libvorbis,mpeg4,png,mjpeg,gif,srt,subrip,webvtt' \
-    --enable-decoder='aac,aac_at,aac_fixed,aac_latm,dnxhd,flac,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,libvorbis,mp3,mpeg4,wavpack,png,mjpeg,gif,pcm_s16le,pcm_s16be,rawvideo,srt,webvtt' \
-    \
-    --enable-libshine \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libvorbis \
-    --enable-bsf=aac_adtstoasc \
-    \
-    --disable-doc \
-    $ADDITIONAL_CONFIGURE_FLAG
-
-make clean
-make -j8
-make install V=1
-
-mkdir -p $DESTINATION_FOLDER/lite/
-cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/lite/
+mkdir -p $DESTINATION_FOLDER/$FLAVOR/
+cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/$FLAVOR/
 
 popd
 }
 
-if [ $TARGET == 'arm-v5te' ]; then
-    #arm v5te
-    CPU=armv5te
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v6' ]; then
-    #arm v6
-    CPU=armv6
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7vfpv3' ]; then
-    #arm v7vfpv3
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfpv3-d16 -marm -march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7vfp' ]; then
-    #arm v7vfp
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7n' ]; then
+if [ $TARGET == 'arm-v7n' ]; then
     #arm v7n
     CPU=armv7-a
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=neon -marm -mtune=cortex-a8 -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=--enable-neon
-    build_one
-elif [ $TARGET == 'arm-v6+vfp' ]; then
-    #arm v6+vfp
-    CPU=armv6
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-DCMP_HAVE_VFP -mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
+    ADDITIONAL_CONFIGURE_FLAG="--enable-neon "
+    LIBX264_FLAGS=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi-v7a/. $PREFIX
     build_one
 elif [ $TARGET == 'arm64-v8a' ]; then
     #arm64-v8a
@@ -457,6 +438,8 @@ elif [ $TARGET == 'arm64-v8a' ]; then
     ARCH=arm64
     OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-arm64-v8a/. $PREFIX
     build_one
 elif [ $TARGET == 'x86_64' ]; then
     #x86_64
@@ -464,6 +447,8 @@ elif [ $TARGET == 'x86_64' ]; then
     ARCH=x86_64
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-x86_64/. $PREFIX
     build_one
 elif [ $TARGET == 'i686' ]; then
     #x86
@@ -471,23 +456,9 @@ elif [ $TARGET == 'i686' ]; then
     ARCH=i686
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
     # disable asm to fix 
-    ADDITIONAL_CONFIGURE_FLAG=' --disable-asm ' 
-    build_one
-elif [ $TARGET == 'mips' ]; then
-    #mips
-    CPU=mips32
-    ARCH=mips
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
-    #"-std=c99 -O3 -Wall -pipe -fpic -fasm -ftree-vectorize -ffunction-sections -funwind-tables -fomit-frame-pointer -funswitch-loops -finline-limit=300 -finline-functions -fpredictive-commoning -fgcse-after-reload -fipa-cp-clone -Wno-psabi -Wa,--noexecstack"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'mips64' ]; then
-    #mips
-    CPU=mips64r6
-    ARCH=mips64
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
-    #"-std=c99 -O3 -Wall -pipe -fpic -fasm -ftree-vectorize -ffunction-sections -funwind-tables -fomit-frame-pointer -funswitch-loops -finline-limit=300 -finline-functions -fpredictive-commoning -fgcse-after-reload -fipa-cp-clone -Wno-psabi -Wa,--noexecstack"
-    ADDITIONAL_CONFIGURE_FLAG=
+    ADDITIONAL_CONFIGURE_FLAG='--disable-asm' 
+    LIBX264_FLAGS="--disable-asm"
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-x86/. $PREFIX
     build_one
 elif [ $TARGET == 'armv7-a' ]; then
     # armv7-a
@@ -495,6 +466,8 @@ elif [ $TARGET == 'armv7-a' ]; then
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -marm -march=$CPU -Os -O3 "
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi-v7a/. $PREFIX
     build_one
 elif [ $TARGET == 'arm' ]; then
     #arm
@@ -502,6 +475,8 @@ elif [ $TARGET == 'arm' ]; then
     ARCH=arm
     OPTIMIZE_CFLAGS="-march=$CPU -Os -O3 "
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS="--disable-asm"
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi/. $PREFIX
     build_one
 elif [ $TARGET == 'native' ]; then
     # host = current machine
@@ -509,6 +484,7 @@ elif [ $TARGET == 'native' ]; then
     ARCH=native
     OPTIMIZE_CFLAGS="-O2 -pipe -march=native"
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
     build_one
 else
     echo "Unknown target: $TARGET"

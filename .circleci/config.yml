@@ -14,12 +14,13 @@ defaults: &defaults
             mkdir -p build_logs;
             export FINAL_DIR=$(pwd)/artifacts/$TARGET;
             export BUILD_DIR=$(pwd)/build_scripts/build_dir && mkdir -p $BUILD_DIR;
-            ./build_scripts/build_ffmpeg.sh $TARGET $BUILD_DIR $FINAL_DIR;
+            ./build_scripts/build_ffmpeg.sh $TARGET full $BUILD_DIR $FINAL_DIR;
+            ./build_scripts/build_ffmpeg.sh $TARGET lite $BUILD_DIR $FINAL_DIR;
       - run: 
           name: Copy error report
           command: |
             mkdir -p build_logs/ffmpeg; 
-            cp build_scripts/ffmpeg-$FFMPEG_VERSION/config.log build_logs/ffmpeg/ || true;
+            cp ffmpeg-$FFMPEG_VERSION/config.log build_logs/ffmpeg/ || true;
           when: on_fail
       - store_artifacts:
           path: build_logs
@@ -49,12 +50,12 @@ jobs:
       TARGET: arm64-v8a
     << : *defaults
 
-  build_arm_x86:
+  build_x86:
     environment:
       TARGET: i686
     << : *defaults
 
-  build_arm_x86_64:
+  build_x86_64:
     environment:
       TARGET: x86_64
     << : *defaults
@@ -100,8 +101,8 @@ workflows:
       - build_arm_v7a
       - build_arm_v7a_neon
       - build_arm_v8a
-      - build_arm_x86
-      - build_arm_x86_64
+      - build_x86
+      - build_x86_64
       - build_native_linux
       - hold:
           type: approval
@@ -110,14 +111,14 @@ workflows:
             - build_arm_v7a
             - build_arm_v7a_neon
             - build_arm_v8a
-            - build_arm_x86
-            - build_arm_x86_64
+            - build_x86
+            - build_x86_64
             - build_native_linux
-      - create_release:
-          requires:
-            - hold
           filters:
             branches:
               only: master
+      - create_release:
+          requires:
+            - hold
 
 

@@ -227,24 +227,40 @@ export CPPFLAGS="--sysroot=$SYSROOT "
 export STRIP=${CROSS_PREFIX}strip
 export PATH="$PATH:$PREFIX/bin/"
 
-# TODO: fix build failed
-# pushd x264
-# ./configure \
-#     --cross-prefix=$CROSS_PREFIX \
-#     --sysroot=$SYSROOT \
-#     --host=$HOST \
-#     --enable-pic \
-#     --enable-static \
-#     --disable-shared \
-#     --disable-cli \
-#     --disable-opencl \
-#     --disable-asm \
-#     --prefix=$PREFIX
+if [ "$FLAVOR" = "full" ]; then 
+    pushd x264
+        ./configure \
+            --cross-prefix=$CROSS_PREFIX \
+            --sysroot=$SYSROOT \
+            --host=$HOST \
+            --enable-pic \
+            --enable-static \
+            --disable-shared \
+            --disable-cli \
+            --disable-opencl \
+            --disable-asm \
+            --prefix=$PREFIX
 
-# make clean
-# make -j8
-# make install
-# popd
+        make clean
+        make -j8
+        make install
+    popd
+
+    # Non-free
+    pushd fdk-aac-${FDK_AAC_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --enable-static \
+            --disable-shared \
+            --with-sysroot=$SYSROOT
+
+        make clean
+        make -j8
+        make install
+    popd
+fi;
+
 
 pushd opus-${OPUS_VERSION}
 ./configure \
@@ -258,21 +274,6 @@ pushd opus-${OPUS_VERSION}
 make clean
 make -j8
 make install V=1
-popd
-
-
-# Non-free
-pushd fdk-aac-${FDK_AAC_VERSION}
-./configure \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --enable-static \
-    --disable-shared \
-    --with-sysroot=$SYSROOT
-
-make clean
-make -j8
-make install
 popd
 
 pushd lame-${LAME_VERSION}
@@ -366,6 +367,7 @@ if [ "$FLAVOR" = "full" ]; then
         --enable-libmp3lame \
         --enable-libopus \
         --enable-libvorbis \
+        --enable-libx264 \
         --enable-libfdk-aac \
         --enable-bsf=aac_adtstoasc \
         --enable-openssl \

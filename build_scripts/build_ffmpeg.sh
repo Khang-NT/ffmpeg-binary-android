@@ -167,7 +167,7 @@ then
     if [ "$(uname)" == "Darwin" ]; then
         brew install openssl
     else 
-        sudo apt-get install libssl-dev
+        sudo apt-get install -y libssl-dev
     fi
 elif [ $ARCH == "arm" ]
 then

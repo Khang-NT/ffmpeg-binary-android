@@ -185,8 +185,6 @@ then
     HOST=arm-linux-androideabi
     CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
     OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS "
-    
-#added by alexvas
 elif [ $ARCH == "arm64" ]
 then
     SYSROOT=$ARM64_SYSROOT
@@ -241,7 +239,6 @@ if [ "$FLAVOR" = "full" ]; then
             --disable-shared \
             --disable-cli \
             --disable-opencl \
-            --disable-asm \
             --prefix=$PREFIX
 
         make clean
@@ -357,7 +354,6 @@ if [ "$FLAVOR" = "full" ]; then
         --enable-small \
         --enable-gpl \
         --enable-nonfree \
-        --disable-asm \
         \
         --disable-shared \
         --enable-static \

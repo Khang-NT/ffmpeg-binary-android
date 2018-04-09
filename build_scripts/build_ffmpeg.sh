@@ -153,8 +153,17 @@ function build_one
 
 if [ "$(uname)" == "Darwin" ]; then
     brew install yasm nasm
-else 
-    sudo apt-get install -y yasm nasm
+else
+    # Install nasm >= 2.13 for libx264
+    if [ ! -d "nasm-2.13.03" ]; then
+        curl -LO 'http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/nasm-2.13.03.tar.xz'
+        tar -xf nasm-2.13.03.tar.xz
+    fi
+    pushd nasm-2.13.03
+        ./configure --prefix=/usr
+        make
+        sudo make install
+    popd
 fi
 
 if [ $ARCH == "native" ]

@@ -76,11 +76,14 @@ else
     echo "Using existing `pwd`/yasm-${YASM_VERSION}"
 fi
 
-if [ ! -d "x264" ]; then
-    echo "Cloning x264"
-    git clone --depth=1 git://git.videolan.org/x264.git x264
+
+LIBX264_VERSION="snapshot-20171130-2245"
+if [ ! -d "x264-$LIBX264_VERSION" ]; then
+    echo "Downloading x264-$LIBX264_VERSION"
+    curl -O "ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-$LIBX264_VERSION.tar.bz2"
+    tar -xf "x264-$LIBX264_VERSION.tar.bz2"
 else
-    echo "Using existing `pwd`/x264"
+    echo "Using existing `pwd`/x264-$LIBX264_VERSION"
 fi
 
 OPUS_VERSION="1.1.5"
@@ -228,7 +231,7 @@ export STRIP=${CROSS_PREFIX}strip
 export PATH="$PATH:$PREFIX/bin/"
 
 if [ "$FLAVOR" = "full" ]; then 
-    pushd x264
+    pushd x264-$LIBX264_VERSION
         ./configure \
             --cross-prefix=$CROSS_PREFIX \
             --sysroot=$SYSROOT \

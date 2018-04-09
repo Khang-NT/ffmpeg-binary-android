@@ -181,7 +181,7 @@ then
     SYSROOT=$ARM_SYSROOT
     HOST=arm-linux-androideabi
     CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
-    OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\)"
+    OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS "
     
 #added by alexvas
 elif [ $ARCH == "arm64" ]

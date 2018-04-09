@@ -357,6 +357,7 @@ if [ "$FLAVOR" = "full" ]; then
         --enable-small \
         --enable-gpl \
         --enable-nonfree \
+        --disable-asm \
         \
         --disable-shared \
         --enable-static \

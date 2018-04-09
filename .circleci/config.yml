@@ -14,7 +14,8 @@ defaults: &defaults
             mkdir -p build_logs;
             export FINAL_DIR=$(pwd)/artifacts/$TARGET;
             export BUILD_DIR=$(pwd)/build_scripts/build_dir && mkdir -p $BUILD_DIR;
-            ./build_scripts/build_ffmpeg.sh $TARGET $BUILD_DIR $FINAL_DIR;
+            ./build_scripts/build_ffmpeg.sh $TARGET full $BUILD_DIR $FINAL_DIR;
+            ./build_scripts/build_ffmpeg.sh $TARGET lite $BUILD_DIR $FINAL_DIR;
       - run: 
           name: Copy error report
           command: |

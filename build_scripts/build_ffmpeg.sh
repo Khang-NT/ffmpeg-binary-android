@@ -15,8 +15,9 @@ if [ "$NDK" = "" ] || [ ! -d $NDK ]; then
 fi
 
 export TARGET=$1
-export PREFIX=$2
-export DESTINATION_FOLDER=$3
+export FLAVOR=$2
+export PREFIX=$3
+export DESTINATION_FOLDER=$4
 
 if [ "$(uname)" == "Darwin" ]; then
     OS="darwin-x86_64"
@@ -26,14 +27,20 @@ fi
 
 NATIVE_SYSROOT=/
 
-ARM_SYSROOT=$NDK/platforms/android-16/arch-arm/
+if [ "$FLAVOR" = "lite" ]; then 
+    # LITE flavor support android 16+
+    ARM_SYSROOT=$NDK/platforms/android-16/arch-arm/
+    X86_SYSROOT=$NDK/platforms/android-16/arch-x86/
+else 
+    # FULL flavor require android 21 at minimum (because of including openssl)
+    ARM_SYSROOT=$NDK/platforms/android-21/arch-arm/
+    X86_SYSROOT=$NDK/platforms/android-21/arch-x86/
+fi
 ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/$OS
+X86_PREBUILT=$NDK/toolchains/x86-4.9/prebuilt/$OS
 
 ARM64_SYSROOT=$NDK/platforms/android-21/arch-arm64/
 ARM64_PREBUILT=$NDK/toolchains/aarch64-linux-android-4.9/prebuilt/$OS
-
-X86_SYSROOT=$NDK/platforms/android-16/arch-x86/
-X86_PREBUILT=$NDK/toolchains/x86-4.9/prebuilt/$OS
 
 X86_64_SYSROOT=$NDK/platforms/android-21/arch-x86_64/
 X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
@@ -336,88 +343,82 @@ else
         --sysroot=$SYSROOT"
 fi
 
-# Build - FULL version
-./configure --prefix=$PREFIX \
-    $CROSS_COMPILE_FLAGS \
-    --pkg-config=$(which pkg-config) \
-    --pkg-config-flags="--static" \
-    --enable-pic \
-    --enable-small \
-    --enable-gpl \
-    --enable-nonfree \
-    \
-    --disable-shared \
-    --enable-static \
-    \
-    --enable-ffmpeg \
-    --disable-ffplay \
-    --disable-ffprobe \
-    --disable-ffserver \
-    \
-    --enable-libshine \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libvorbis \
-    --enable-libfdk-aac \
-    --enable-bsf=aac_adtstoasc \
-    --enable-openssl \
-    \
-    --disable-doc \
-    $ADDITIONAL_CONFIGURE_FLAG
+if [ "$FLAVOR" = "full" ]; then
+    # Build - FULL version
+    ./configure --prefix=$PREFIX \
+        $CROSS_COMPILE_FLAGS \
+        --pkg-config=$(which pkg-config) \
+        --pkg-config-flags="--static" \
+        --enable-pic \
+        --enable-small \
+        --enable-gpl \
+        --enable-nonfree \
+        \
+        --disable-shared \
+        --enable-static \
+        \
+        --enable-ffmpeg \
+        --disable-ffplay \
+        --disable-ffprobe \
+        --disable-ffserver \
+        \
+        --enable-libshine \
+        --enable-libmp3lame \
+        --enable-libopus \
+        --enable-libvorbis \
+        --enable-libfdk-aac \
+        --enable-bsf=aac_adtstoasc \
+        --enable-openssl \
+        \
+        --disable-doc \
+        $ADDITIONAL_CONFIGURE_FLAG
+else 
+    # Build - LITE version
+    ./configure --prefix=$PREFIX \
+        $CROSS_COMPILE_FLAGS \
+        --pkg-config=$(which pkg-config) \
+        --pkg-config-flags="--static" \
+        --enable-pic \
+        --enable-small \
+        --enable-gpl \
+        \
+        --disable-shared \
+        --enable-static \
+        \
+        --enable-ffmpeg \
+        --disable-ffplay \
+        --disable-ffprobe \
+        --disable-ffserver \
+        \
+        --disable-protocols \
+        --enable-protocol='file,pipe' \
+        \
+        --disable-demuxers \
+        --disable-muxers \
+        --enable-demuxer='aac,avi,dnxhd,flac,flv,gif,h261,h263,h264,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image2pipe,mjpeg' \
+        --enable-muxer='3gp,dnxhd,flac,flv,gif,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,opus,srt,wav,webvtt,ipod,gif,image2,image2pipe,mjpeg' \
+        \
+        --disable-encoders \
+        --disable-decoders \
+        --enable-encoder='aac,dnxhd,flac,flv,gif,libmp3lame,libopus,libshine,libvorbis,mpeg4,png,mjpeg,gif,srt,subrip,webvtt' \
+        --enable-decoder='aac,aac_at,aac_fixed,aac_latm,dnxhd,flac,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,libvorbis,mp3,mpeg4,wavpack,png,mjpeg,gif,pcm_s16le,pcm_s16be,rawvideo,srt,webvtt' \
+        \
+        --enable-libshine \
+        --enable-libmp3lame \
+        --enable-libopus \
+        --enable-libvorbis \
+        --enable-bsf=aac_adtstoasc \
+        \
+        --disable-doc \
+        $ADDITIONAL_CONFIGURE_FLAG
+fi;
 
 make clean
 make -j8
 make install V=1
 
-mkdir -p $DESTINATION_FOLDER/full/
-cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/full/
-
-
-# Build - LITE version
-./configure --prefix=$PREFIX \
-    $CROSS_COMPILE_FLAGS \
-    --pkg-config=$(which pkg-config) \
-    --pkg-config-flags="--static" \
-    --enable-pic \
-    --enable-small \
-    --enable-gpl \
-    \
-    --disable-shared \
-    --enable-static \
-    \
-    --enable-ffmpeg \
-    --disable-ffplay \
-    --disable-ffprobe \
-    --disable-ffserver \
-    \
-    --disable-protocols \
-    --enable-protocol='file,pipe' \
-    \
-    --disable-demuxers \
-    --disable-muxers \
-    --enable-demuxer='aac,avi,dnxhd,flac,flv,gif,h261,h263,h264,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image2pipe,mjpeg' \
-    --enable-muxer='3gp,dnxhd,flac,flv,gif,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,opus,srt,wav,webvtt,ipod,gif,image2,image2pipe,mjpeg' \
-    \
-    --disable-encoders \
-    --disable-decoders \
-    --enable-encoder='aac,dnxhd,flac,flv,gif,libmp3lame,libopus,libshine,libvorbis,mpeg4,png,mjpeg,gif,srt,subrip,webvtt' \
-    --enable-decoder='aac,aac_at,aac_fixed,aac_latm,dnxhd,flac,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,libvorbis,mp3,mpeg4,wavpack,png,mjpeg,gif,pcm_s16le,pcm_s16be,rawvideo,srt,webvtt' \
-    \
-    --enable-libshine \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libvorbis \
-    --enable-bsf=aac_adtstoasc \
-    \
-    --disable-doc \
-    $ADDITIONAL_CONFIGURE_FLAG
-
-make clean
-make -j8
-make install V=1
-
-mkdir -p $DESTINATION_FOLDER/lite/
-cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/lite/
+mkdir -p $DESTINATION_FOLDER/$FLAVOR/
+cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/$FLAVOR/
 
 popd
 }

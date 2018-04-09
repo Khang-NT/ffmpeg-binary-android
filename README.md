@@ -1,3 +1,5 @@
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Prebuilt%20FFmpeg%20Android-brightgreen.svg?style=flat-square)](https://android-arsenal.com/details/1/6815)
+
 # Prebuilt FFmpeg Android
 This repo contains build scripts to build FFmpeg executable binary for Android and also [publish prebuilt files here](https://github.com/Khang-NT/ffmpeg-binary-android/releases).
 There are two build flavors: _FULL_ and _LITE_
@@ -21,7 +23,8 @@ There are two build flavors: _FULL_ and _LITE_
     + Include libraries in `LITE` version, plus with: `libfdk-aac` (**non-free**), `libx264`, **`openssl`** (thanks to [leenjewel/openssl_for_ios_and_android](https://github.com/leenjewel/openssl_for_ios_and_android))
 
 ## Download
-Latest build: [![Latest build](https://img.shields.io/github/release/Khang-NT/ffmpeg-binary-android.svg?style=for-the-badge)](https://github.com/Khang-NT/ffmpeg-binary-android/releases)
+Latest build: 
+[![Latest build](https://img.shields.io/github/release/Khang-NT/ffmpeg-binary-android.svg?style=for-the-badge)](https://github.com/Khang-NT/ffmpeg-binary-android/releases)
 
 ## Build  
 

@@ -140,6 +140,13 @@ fi
 #     echo "Using existing `pwd`/libvpx-${LIBVPX_VERSION}"
 # fi
 
+# Download lib openssl prebuilt
+OPENSSL_PREBUILT_FOLDER="$(pwd)/openssl-prebuilt"
+if [ ! -d $OPENSSL_PREBUILT_FOLDER/android ]; then
+    curl -LO "https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/openssl-1.0.2k/openssl.1.0.2k_for_android_ios.zip"
+    mkdir -p $OPENSSL_PREBUILT_FOLDER && unzip -q "openssl.1.0.2k_for_android_ios.zip" -d $OPENSSL_PREBUILT_FOLDER
+fi
+
 
 function build_one
 {
@@ -157,12 +164,18 @@ then
     SYSROOT=$NATIVE_SYSROOT
     HOST=
     CROSS_PREFIX=
+    if [ "$(uname)" == "Darwin" ]; then
+        brew install openssl
+    else 
+        sudo apt-get install libssl-dev
+    fi
 elif [ $ARCH == "arm" ]
 then
     SYSROOT=$ARM_SYSROOT
     HOST=arm-linux-androideabi
     CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
     OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -Dlog2\(x\)=\(log\(x\)/log\(2\)\) -Dlog2f\(x\)=\(logf\(x\)/log\(2\)\)"
+    
 #added by alexvas
 elif [ $ARCH == "arm64" ]
 then
@@ -179,7 +192,6 @@ then
     SYSROOT=$X86_SYSROOT
     HOST=i686-linux-android
     CROSS_PREFIX=$X86_PREBUILT/bin/$HOST-
-
 # elif [ $ARCH == "mips" ]
 # then
 #     SYSROOT=$MIPS_SYSROOT
@@ -348,6 +360,7 @@ fi
     --enable-libvorbis \
     --enable-libfdk-aac \
     --enable-bsf=aac_adtstoasc \
+    --enable-openssl \
     \
     --disable-doc \
     $ADDITIONAL_CONFIGURE_FLAG
@@ -409,11 +422,13 @@ cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/lite/
 popd
 }
 
+if [ $TARGET == 'arm-v7n' ]; then
     #arm v7n
     CPU=armv7-a
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=neon -marm -mtune=cortex-a8 -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=--enable-neon
+    ADDITIONAL_CONFIGURE_FLAG="--enable-neon "
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi-v7a/. $PREFIX
     build_one
 elif [ $TARGET == 'arm64-v8a' ]; then
     #arm64-v8a
@@ -421,6 +436,7 @@ elif [ $TARGET == 'arm64-v8a' ]; then
     ARCH=arm64
     OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-arm64-v8a/. $PREFIX
     build_one
 elif [ $TARGET == 'x86_64' ]; then
     #x86_64
@@ -428,6 +444,7 @@ elif [ $TARGET == 'x86_64' ]; then
     ARCH=x86_64
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-x86_64/. $PREFIX
     build_one
 elif [ $TARGET == 'i686' ]; then
     #x86
@@ -436,6 +453,7 @@ elif [ $TARGET == 'i686' ]; then
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
     # disable asm to fix 
     ADDITIONAL_CONFIGURE_FLAG=' --disable-asm ' 
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-x86/. $PREFIX
     build_one
 elif [ $TARGET == 'armv7-a' ]; then
     # armv7-a
@@ -443,6 +461,7 @@ elif [ $TARGET == 'armv7-a' ]; then
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -marm -march=$CPU -Os -O3 "
     ADDITIONAL_CONFIGURE_FLAG=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi-v7a/. $PREFIX
     build_one
 elif [ $TARGET == 'arm' ]; then
     #arm
@@ -450,6 +469,7 @@ elif [ $TARGET == 'arm' ]; then
     ARCH=arm
     OPTIMIZE_CFLAGS="-march=$CPU -Os -O3 "
     ADDITIONAL_CONFIGURE_FLAG=
+    cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi/. $PREFIX
     build_one
 elif [ $TARGET == 'native' ]; then
     # host = current machine

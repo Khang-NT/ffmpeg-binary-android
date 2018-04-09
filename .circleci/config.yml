@@ -50,12 +50,12 @@ jobs:
       TARGET: arm64-v8a
     << : *defaults
 
-  build_arm_x86:
+  build_x86:
     environment:
       TARGET: i686
     << : *defaults
 
-  build_arm_x86_64:
+  build_x86_64:
     environment:
       TARGET: x86_64
     << : *defaults
@@ -101,8 +101,8 @@ workflows:
       - build_arm_v7a
       - build_arm_v7a_neon
       - build_arm_v8a
-      - build_arm_x86
-      - build_arm_x86_64
+      - build_x86
+      - build_x86_64
       - build_native_linux
       - hold:
           type: approval
@@ -111,8 +111,8 @@ workflows:
             - build_arm_v7a
             - build_arm_v7a_neon
             - build_arm_v8a
-            - build_arm_x86
-            - build_arm_x86_64
+            - build_x86
+            - build_x86_64
             - build_native_linux
           filters:
             branches:

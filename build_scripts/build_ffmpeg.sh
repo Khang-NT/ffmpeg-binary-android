@@ -67,16 +67,6 @@ else
     echo "Using existing `pwd`/ffmpeg-${FFMPEG_VERSION}"
 fi
 
-YASM_VERSION="1.3.0"
-if [ ! -d "yasm-${YASM_VERSION}" ]; then
-    echo "Downloading yasm-${YASM_VERSION}"
-    curl -O "http://www.tortall.net/projects/yasm/releases/yasm-${YASM_VERSION}.tar.gz"
-    tar -xzf "yasm-${YASM_VERSION}.tar.gz"
-else
-    echo "Using existing `pwd`/yasm-${YASM_VERSION}"
-fi
-
-
 LIBX264_VERSION="snapshot-20171130-2245"
 if [ ! -d "x264-$LIBX264_VERSION" ]; then
     echo "Downloading x264-$LIBX264_VERSION"
@@ -161,13 +151,11 @@ fi
 function build_one
 {
 
-pushd yasm-${YASM_VERSION}
-./configure --prefix=$PREFIX 
-
-# make clean
-make -j8
-make install
-popd
+if [ "$(uname)" == "Darwin" ]; then
+    brew install yasm nasm
+else 
+    sudo apt-get install -y yasm nasm
+fi
 
 if [ $ARCH == "native" ]
 then
@@ -239,7 +227,8 @@ if [ "$FLAVOR" = "full" ]; then
             --disable-shared \
             --disable-cli \
             --disable-opencl \
-            --prefix=$PREFIX
+            --prefix=$PREFIX \
+            $LIBX264_FLAGS
 
         make clean
         make -j8
@@ -431,6 +420,7 @@ if [ $TARGET == 'arm-v7n' ]; then
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=neon -marm -mtune=cortex-a8 -march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG="--enable-neon "
+    LIBX264_FLAGS=
     cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi-v7a/. $PREFIX
     build_one
 elif [ $TARGET == 'arm64-v8a' ]; then
@@ -439,6 +429,7 @@ elif [ $TARGET == 'arm64-v8a' ]; then
     ARCH=arm64
     OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
     cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-arm64-v8a/. $PREFIX
     build_one
 elif [ $TARGET == 'x86_64' ]; then
@@ -447,6 +438,7 @@ elif [ $TARGET == 'x86_64' ]; then
     ARCH=x86_64
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
     cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-x86_64/. $PREFIX
     build_one
 elif [ $TARGET == 'i686' ]; then
@@ -455,7 +447,8 @@ elif [ $TARGET == 'i686' ]; then
     ARCH=i686
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
     # disable asm to fix 
-    ADDITIONAL_CONFIGURE_FLAG=' --disable-asm ' 
+    ADDITIONAL_CONFIGURE_FLAG='--disable-asm' 
+    LIBX264_FLAGS="--disable-asm"
     cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-x86/. $PREFIX
     build_one
 elif [ $TARGET == 'armv7-a' ]; then
@@ -464,6 +457,7 @@ elif [ $TARGET == 'armv7-a' ]; then
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -marm -march=$CPU -Os -O3 "
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
     cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi-v7a/. $PREFIX
     build_one
 elif [ $TARGET == 'arm' ]; then
@@ -472,6 +466,7 @@ elif [ $TARGET == 'arm' ]; then
     ARCH=arm
     OPTIMIZE_CFLAGS="-march=$CPU -Os -O3 "
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS="--disable-asm"
     cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi/. $PREFIX
     build_one
 elif [ $TARGET == 'native' ]; then
@@ -480,6 +475,7 @@ elif [ $TARGET == 'native' ]; then
     ARCH=native
     OPTIMIZE_CFLAGS="-O2 -pipe -march=native"
     ADDITIONAL_CONFIGURE_FLAG=
+    LIBX264_FLAGS=
     build_one
 else
     echo "Unknown target: $TARGET"

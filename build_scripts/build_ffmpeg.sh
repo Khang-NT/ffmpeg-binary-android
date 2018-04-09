@@ -409,47 +409,11 @@ cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/lite/
 popd
 }
 
-if [ $TARGET == 'arm-v5te' ]; then
-    #arm v5te
-    CPU=armv5te
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v6' ]; then
-    #arm v6
-    CPU=armv6
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7vfpv3' ]; then
-    #arm v7vfpv3
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfpv3-d16 -marm -march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7vfp' ]; then
-    #arm v7vfp
-    CPU=armv7-a
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU -Os -O3 "
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'arm-v7n' ]; then
     #arm v7n
     CPU=armv7-a
     ARCH=arm
     OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=neon -marm -mtune=cortex-a8 -march=$CPU -Os -O3"
     ADDITIONAL_CONFIGURE_FLAG=--enable-neon
-    build_one
-elif [ $TARGET == 'arm-v6+vfp' ]; then
-    #arm v6+vfp
-    CPU=armv6
-    ARCH=arm
-    OPTIMIZE_CFLAGS="-DCMP_HAVE_VFP -mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU -Os -O3"
-    ADDITIONAL_CONFIGURE_FLAG=
     build_one
 elif [ $TARGET == 'arm64-v8a' ]; then
     #arm64-v8a
@@ -472,22 +436,6 @@ elif [ $TARGET == 'i686' ]; then
     OPTIMIZE_CFLAGS="-fomit-frame-pointer -march=$CPU -Os -O3"
     # disable asm to fix 
     ADDITIONAL_CONFIGURE_FLAG=' --disable-asm ' 
-    build_one
-elif [ $TARGET == 'mips' ]; then
-    #mips
-    CPU=mips32
-    ARCH=mips
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
-    #"-std=c99 -O3 -Wall -pipe -fpic -fasm -ftree-vectorize -ffunction-sections -funwind-tables -fomit-frame-pointer -funswitch-loops -finline-limit=300 -finline-functions -fpredictive-commoning -fgcse-after-reload -fipa-cp-clone -Wno-psabi -Wa,--noexecstack"
-    ADDITIONAL_CONFIGURE_FLAG=
-    build_one
-elif [ $TARGET == 'mips64' ]; then
-    #mips
-    CPU=mips64r6
-    ARCH=mips64
-    OPTIMIZE_CFLAGS="-march=$CPU -Os -O3"
-    #"-std=c99 -O3 -Wall -pipe -fpic -fasm -ftree-vectorize -ffunction-sections -funwind-tables -fomit-frame-pointer -funswitch-loops -finline-limit=300 -finline-functions -fpredictive-commoning -fgcse-after-reload -fipa-cp-clone -Wno-psabi -Wa,--noexecstack"
-    ADDITIONAL_CONFIGURE_FLAG=
     build_one
 elif [ $TARGET == 'armv7-a' ]; then
     # armv7-a

@@ -140,6 +140,33 @@ fi
 #     echo "Using existing `pwd`/libvpx-${LIBVPX_VERSION}"
 # fi
 
+LIBFREETYPE_VERSION="2.9"
+if [ ! -d "freetype-${LIBFREETYPE_VERSION}" ]; then
+    echo "Downloading freetype-${LIBFREETYPE_VERSION}"
+    curl -LO https://download.savannah.gnu.org/releases/freetype/freetype-${LIBFREETYPE_VERSION}.tar.gz
+    tar -xzf freetype-${LIBFREETYPE_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/freetype-${LIBFREETYPE_VERSION}"
+fi
+
+EXPAT_VERSION="2.1.0"
+if [ ! -d "expat-${EXPAT_VERSION}" ]; then
+    echo "Downloading expat-${EXPAT_VERSION}"
+    curl -LO http://downloads.sourceforge.net/project/expat/expat/2.1.0/expat-${EXPAT_VERSION}.tar.gz
+    tar -xzf expat-${EXPAT_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/expat-${EXPAT_VERSION}"
+fi
+
+LIBFONTCONFIG_VERSION="2.13.0"
+if [ ! -d "fontconfig-${LIBFONTCONFIG_VERSION}" ]; then
+    echo "Downloading fontconfig-${LIBFONTCONFIG_VERSION}"
+    curl -LO https://www.freedesktop.org/software/fontconfig/release/fontconfig-${LIBFONTCONFIG_VERSION}.tar.gz
+    tar -xzf fontconfig-${LIBFONTCONFIG_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/fontconfig-${LIBFONTCONFIG_VERSION}"
+fi
+
 # Download lib openssl prebuilt
 OPENSSL_PREBUILT_FOLDER="$(pwd)/openssl-prebuilt"
 if [ ! -d $OPENSSL_PREBUILT_FOLDER/android ]; then
@@ -152,8 +179,10 @@ function build_one
 {
 
 if [ "$(uname)" == "Darwin" ]; then
-    brew install yasm nasm
+    brew install yasm nasm automake gettext
+    export PATH="/usr/local/opt/gettext/bin:$PATH"
 else
+    sudo apt-get install automake gettext libtool
     # Install nasm >= 2.13 for libx264
     if [ ! -d "nasm-2.13.03" ]; then
         curl -LO 'http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/nasm-2.13.03.tar.xz'
@@ -252,6 +281,64 @@ if [ "$FLAVOR" = "full" ]; then
             --enable-static \
             --disable-shared \
             --with-sysroot=$SYSROOT
+
+        make clean
+        make -j8
+        make install
+    popd
+
+    pushd freetype-${LIBFREETYPE_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --with-zlib=yes \
+            --enable-static \
+            --disable-shared 
+        
+        make clean
+        make -j8
+        make install
+    popd
+
+    # required by fontconfig
+    pushd libuuid-1.0.3
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --enable-static \
+            --disable-shared 
+        
+        make clean
+        make -j8
+        make install
+    popd
+
+    # required by fontconfig
+    pushd expat-${EXPAT_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --enable-static \
+            --disable-shared 
+
+        make clean 
+        make -j8
+        make install
+    popd
+
+    pushd fontconfig-${LIBFONTCONFIG_VERSION}
+        autoreconf -iv
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --disable-libxml2 \
+            --disable-iconv \
+            --enable-static \
+            --disable-shared \
+            --disable-docs
 
         make clean
         make -j8
@@ -369,6 +456,9 @@ if [ "$FLAVOR" = "full" ]; then
         --enable-libfdk-aac \
         --enable-bsf=aac_adtstoasc \
         --enable-openssl \
+        --enable-libfreetype  \
+        --enable-libfontconfig \
+        --enable-zlib \
         \
         --disable-doc \
         $ADDITIONAL_CONFIGURE_FLAG

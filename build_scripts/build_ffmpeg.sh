@@ -182,7 +182,7 @@ if [ "$(uname)" == "Darwin" ]; then
     brew install yasm nasm automake gettext
     export PATH="/usr/local/opt/gettext/bin:$PATH"
 else
-    sudo apt-get install automake gettext libtool
+    sudo apt-get -y install automake gettext libtool
     # Install nasm >= 2.13 for libx264
     if [ ! -d "nasm-2.13.03" ]; then
         curl -LO 'http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/nasm-2.13.03.tar.xz'

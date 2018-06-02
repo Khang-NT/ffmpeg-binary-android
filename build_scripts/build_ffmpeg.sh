@@ -153,7 +153,7 @@ EXPAT_VERSION="2.2.3"
 if [ ! -d "expat-${EXPAT_VERSION}" ]; then
     echo "Downloading expat-${EXPAT_VERSION}"
     curl -LO http://downloads.sourceforge.net/project/expat/expat/${EXPAT_VERSION}/expat-${EXPAT_VERSION}.tar.bz2
-    tar -xzf expat-${EXPAT_VERSION}.tar.bz2
+    tar -xf expat-${EXPAT_VERSION}.tar.bz2
 else
     echo "Using existing `pwd`/expat-${EXPAT_VERSION}"
 fi

@@ -322,6 +322,21 @@ if [ "$FLAVOR" = "full" ]; then
         make install
     popd
 
+    pushd libpng-${LIBPNG_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --enable-static \
+            --disable-shared \
+            --enable-arm-neon="$ARM_NEON" \
+            --disable-shared
+
+        make clean 
+        make -j8
+        make install
+    popd
+
     pushd freetype-${LIBFREETYPE_VERSION}
         ./configure \
             --prefix=$PREFIX \
@@ -358,21 +373,6 @@ if [ "$FLAVOR" = "full" ]; then
             --with-pic \
             --enable-static \
             --disable-shared 
-
-        make clean 
-        make -j8
-        make install
-    popd
-
-    pushd libpng-${LIBPNG_VERSION}
-        ./configure \
-            --prefix=$PREFIX \
-            --host=$HOST \
-            --with-pic \
-            --enable-static \
-            --disable-shared \
-            --enable-arm-neon="$ARM_NEON" \
-            --disable-shared
 
         make clean 
         make -j8

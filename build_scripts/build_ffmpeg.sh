@@ -161,7 +161,7 @@ fi
 LIBUUID_VERSION="1.0.3"
 if [ ! -d "libuuid-${LIBUUID_VERSION}" ]; then
     echo "Downloading libuuid-${LIBUUID_VERSION}"
-    curl -LO https://excellmedia.dl.sourceforge.net/project/libuuid/libuuid-${LIBUUID_VERSION}.tar.gz
+    curl -LO https://downloads.sourceforge.net/project/libuuid/libuuid-${LIBUUID_VERSION}.tar.gz
     tar -xf libuuid-${LIBUUID_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/libuuid-${LIBUUID_VERSION}"
@@ -188,7 +188,7 @@ fi
 LIBPNG_VERSION="1.6.34"
 if [ ! -d "libpng-${LIBPNG_VERSION}" ]; then
     echo "Downloading libpng-${LIBPNG_VERSION}"
-    curl -LO https://netix.dl.sourceforge.net/project/libpng/libpng16/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.xz
+    curl -LO https://downloads.sourceforge.net/project/libpng/libpng16/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.xz
     tar -xf libpng-${LIBPNG_VERSION}.tar.xz
 else
     echo "Using existing `pwd`/libpng-${LIBPNG_VERSION}"

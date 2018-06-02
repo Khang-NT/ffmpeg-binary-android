@@ -209,6 +209,7 @@ if [ "$(uname)" == "Darwin" ]; then
     brew install yasm nasm automake gettext
     export PATH="/usr/local/opt/gettext/bin:$PATH"
 else
+    sudo apt-get update
     sudo apt-get -y install automake autopoint libtool gperf
     # Install nasm >= 2.13 for libx264
     if [ ! -d "nasm-2.13.03" ]; then

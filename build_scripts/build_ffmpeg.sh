@@ -158,6 +158,15 @@ else
     echo "Using existing `pwd`/expat-${EXPAT_VERSION}"
 fi
 
+LIBUUID_VERSION="1.0.3"
+if [ ! -d "libuuid-${LIBUUID_VERSION}" ]; then
+    echo "Downloading libuuid-${LIBUUID_VERSION}"
+    curl -LO https://excellmedia.dl.sourceforge.net/project/libuuid/libuuid-${LIBUUID_VERSION}.tar.gz
+    tar -xzf libuuid-${LIBUUID_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/libuuid-${LIBUUID_VERSION}"
+fi
+
 LIBFONTCONFIG_VERSION="2.13.0"
 if [ ! -d "fontconfig-${LIBFONTCONFIG_VERSION}" ]; then
     echo "Downloading fontconfig-${LIBFONTCONFIG_VERSION}"
@@ -302,7 +311,7 @@ if [ "$FLAVOR" = "full" ]; then
     popd
 
     # required by fontconfig
-    pushd libuuid-1.0.3
+    pushd libuuid-${LIBUUID_VERSION}
         ./configure \
             --prefix=$PREFIX \
             --host=$HOST \

@@ -149,11 +149,11 @@ else
     echo "Using existing `pwd`/freetype-${LIBFREETYPE_VERSION}"
 fi
 
-EXPAT_VERSION="2.1.0"
+EXPAT_VERSION="2.2.3"
 if [ ! -d "expat-${EXPAT_VERSION}" ]; then
     echo "Downloading expat-${EXPAT_VERSION}"
-    curl -LO http://downloads.sourceforge.net/project/expat/expat/2.1.0/expat-${EXPAT_VERSION}.tar.gz
-    tar -xzf expat-${EXPAT_VERSION}.tar.gz
+    curl -LO http://downloads.sourceforge.net/project/expat/expat/${EXPAT_VERSION}/expat-${EXPAT_VERSION}.tar.bz2
+    tar -xzf expat-${EXPAT_VERSION}.tar.bz2
 else
     echo "Using existing `pwd`/expat-${EXPAT_VERSION}"
 fi
@@ -191,7 +191,7 @@ if [ "$(uname)" == "Darwin" ]; then
     brew install yasm nasm automake gettext
     export PATH="/usr/local/opt/gettext/bin:$PATH"
 else
-    sudo apt-get -y install automake gettext libtool
+    sudo apt-get -y install automake gettext autopoint libtool
     # Install nasm >= 2.13 for libx264
     if [ ! -d "nasm-2.13.03" ]; then
         curl -LO 'http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/nasm-2.13.03.tar.xz'

@@ -80,7 +80,7 @@ OPUS_VERSION="1.1.5"
 if [ ! -d "opus-${OPUS_VERSION}" ]; then
     echo "Downloading opus-${OPUS_VERSION}"
     curl -LO https://archive.mozilla.org/pub/opus/opus-${OPUS_VERSION}.tar.gz
-    tar -xzf opus-${OPUS_VERSION}.tar.gz
+    tar -xf opus-${OPUS_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/opus-${OPUS_VERSION}"
 fi
@@ -89,7 +89,7 @@ FDK_AAC_VERSION="0.1.5"
 if [ ! -d "fdk-aac-${FDK_AAC_VERSION}" ]; then
     echo "Downloading fdk-aac-${FDK_AAC_VERSION}"
     curl -LO http://downloads.sourceforge.net/opencore-amr/fdk-aac-${FDK_AAC_VERSION}.tar.gz
-    tar -xzf fdk-aac-${FDK_AAC_VERSION}.tar.gz
+    tar -xf fdk-aac-${FDK_AAC_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/fdk-aac-${FDK_AAC_VERSION}"
 fi
@@ -99,7 +99,7 @@ LAME_VERSION="3.99.5"
 if [ ! -d "lame-${LAME_VERSION}" ]; then
     echo "Downloading lame-${LAME_VERSION}"
     curl -LO http://downloads.sourceforge.net/project/lame/lame/${LAME_MAJOR}/lame-${LAME_VERSION}.tar.gz
-    tar -xzf lame-${LAME_VERSION}.tar.gz
+    tar -xf lame-${LAME_VERSION}.tar.gz
     curl -L -o lame-${LAME_VERSION}/config.guess "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
     curl -L -o lame-${LAME_VERSION}/config.sub "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD"
 else
@@ -117,7 +117,7 @@ LIBOGG_VERSION="1.3.2"
 if [ ! -d "libogg-${LIBOGG_VERSION}" ]; then
     echo "Downloading libogg-${LIBOGG_VERSION}"
     curl -LO http://downloads.xiph.org/releases/ogg/libogg-${LIBOGG_VERSION}.tar.gz
-    tar -xzf libogg-${LIBOGG_VERSION}.tar.gz
+    tar -xf libogg-${LIBOGG_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/libogg-${LIBOGG_VERSION}"
 fi
@@ -126,7 +126,7 @@ LIBVORBIS_VERSION="1.3.4"
 if [ ! -d "libvorbis-${LIBVORBIS_VERSION}" ]; then
     echo "Downloading libvorbis-${LIBVORBIS_VERSION}"
     curl -LO http://downloads.xiph.org/releases/vorbis/libvorbis-${LIBVORBIS_VERSION}.tar.gz
-    tar -xzf libvorbis-${LIBVORBIS_VERSION}.tar.gz
+    tar -xf libvorbis-${LIBVORBIS_VERSION}.tar.gz
 else
     echo "Using existing `pwd`/libvorbis-${LIBVORBIS_VERSION}"
 fi
@@ -140,6 +140,60 @@ fi
 #     echo "Using existing `pwd`/libvpx-${LIBVPX_VERSION}"
 # fi
 
+LIBFREETYPE_VERSION="2.9"
+if [ ! -d "freetype-${LIBFREETYPE_VERSION}" ]; then
+    echo "Downloading freetype-${LIBFREETYPE_VERSION}"
+    curl -LO https://download.savannah.gnu.org/releases/freetype/freetype-${LIBFREETYPE_VERSION}.tar.gz
+    tar -xf freetype-${LIBFREETYPE_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/freetype-${LIBFREETYPE_VERSION}"
+fi
+
+EXPAT_VERSION="2.2.3"
+if [ ! -d "expat-${EXPAT_VERSION}" ]; then
+    echo "Downloading expat-${EXPAT_VERSION}"
+    curl -LO http://downloads.sourceforge.net/project/expat/expat/${EXPAT_VERSION}/expat-${EXPAT_VERSION}.tar.bz2
+    tar -xf expat-${EXPAT_VERSION}.tar.bz2
+else
+    echo "Using existing `pwd`/expat-${EXPAT_VERSION}"
+fi
+
+LIBUUID_VERSION="1.0.3"
+if [ ! -d "libuuid-${LIBUUID_VERSION}" ]; then
+    echo "Downloading libuuid-${LIBUUID_VERSION}"
+    curl -LO https://downloads.sourceforge.net/project/libuuid/libuuid-${LIBUUID_VERSION}.tar.gz
+    tar -xf libuuid-${LIBUUID_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/libuuid-${LIBUUID_VERSION}"
+fi
+
+LIBFONTCONFIG_VERSION="2.13.0"
+if [ ! -d "fontconfig-${LIBFONTCONFIG_VERSION}" ]; then
+    echo "Downloading fontconfig-${LIBFONTCONFIG_VERSION}"
+    curl -LO https://www.freedesktop.org/software/fontconfig/release/fontconfig-${LIBFONTCONFIG_VERSION}.tar.gz
+    tar -xf fontconfig-${LIBFONTCONFIG_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/fontconfig-${LIBFONTCONFIG_VERSION}"
+fi
+
+GETTEXT_VERSION="0.19.8.1"
+if [ ! -d "gettext-${GETTEXT_VERSION}" ]; then
+    echo "Downloading gettext-${GETTEXT_VERSION}"
+    curl -LO http://ftp.gnu.org/pub/gnu/gettext/gettext-${GETTEXT_VERSION}.tar.gz
+    tar -xf gettext-${GETTEXT_VERSION}.tar.gz
+else
+    echo "Using existing `pwd`/gettext-${GETTEXT_VERSION}"
+fi
+
+LIBPNG_VERSION="1.6.34"
+if [ ! -d "libpng-${LIBPNG_VERSION}" ]; then
+    echo "Downloading libpng-${LIBPNG_VERSION}"
+    curl -LO https://downloads.sourceforge.net/project/libpng/libpng16/${LIBPNG_VERSION}/libpng-${LIBPNG_VERSION}.tar.xz
+    tar -xf libpng-${LIBPNG_VERSION}.tar.xz
+else
+    echo "Using existing `pwd`/libpng-${LIBPNG_VERSION}"
+fi
+
 # Download lib openssl prebuilt
 OPENSSL_PREBUILT_FOLDER="$(pwd)/openssl-prebuilt"
 if [ ! -d $OPENSSL_PREBUILT_FOLDER/android ]; then
@@ -152,8 +206,11 @@ function build_one
 {
 
 if [ "$(uname)" == "Darwin" ]; then
-    brew install yasm nasm
+    brew install yasm nasm automake gettext
+    export PATH="/usr/local/opt/gettext/bin:$PATH"
 else
+    sudo apt-get update
+    sudo apt-get -y install automake autopoint libtool gperf
     # Install nasm >= 2.13 for libx264
     if [ ! -d "nasm-2.13.03" ]; then
         curl -LO 'http://www.nasm.us/pub/nasm/releasebuilds/2.13.03/nasm-2.13.03.tar.xz'
@@ -164,6 +221,14 @@ else
         make
         sudo make install
     popd
+
+    if [ "$FLAVOR" = "full" ]; then 
+        pushd gettext-${GETTEXT_VERSION}
+            ./configure --prefix=/usr
+            make
+            sudo make install
+        popd
+    fi;
 fi
 
 if [ $ARCH == "native" ]
@@ -252,6 +317,80 @@ if [ "$FLAVOR" = "full" ]; then
             --enable-static \
             --disable-shared \
             --with-sysroot=$SYSROOT
+
+        make clean
+        make -j8
+        make install
+    popd
+
+    pushd libpng-${LIBPNG_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --enable-static \
+            --disable-shared \
+            --enable-arm-neon="$ARM_NEON" \
+            --disable-shared
+
+        make clean 
+        make -j8
+        make install
+    popd
+
+    pushd freetype-${LIBFREETYPE_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --with-png=yes \
+            --with-zlib=yes \
+            --enable-static \
+            --disable-shared 
+        
+        make clean
+        make -j8
+        make install
+    popd
+
+    # required by fontconfig
+    pushd libuuid-${LIBUUID_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --enable-static \
+            --disable-shared 
+        
+        make clean
+        make -j8
+        make install
+    popd
+
+    # required by fontconfig
+    pushd expat-${EXPAT_VERSION}
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --enable-static \
+            --disable-shared 
+
+        make clean 
+        make -j8
+        make install
+    popd
+
+    pushd fontconfig-${LIBFONTCONFIG_VERSION}
+        autoreconf -iv
+        ./configure \
+            --prefix=$PREFIX \
+            --host=$HOST \
+            --with-pic \
+            --disable-libxml2 \
+            --disable-iconv \
+            --enable-static \
+            --disable-shared \
+            --disable-docs
 
         make clean
         make -j8
@@ -369,6 +508,9 @@ if [ "$FLAVOR" = "full" ]; then
         --enable-libfdk-aac \
         --enable-bsf=aac_adtstoasc \
         --enable-openssl \
+        --enable-libfreetype  \
+        --enable-libfontconfig \
+        --enable-zlib \
         \
         --disable-doc \
         $ADDITIONAL_CONFIGURE_FLAG
@@ -423,6 +565,7 @@ cp $PREFIX/bin/ffmpeg $DESTINATION_FOLDER/$FLAVOR/
 popd
 }
 
+ARM_NEON="no"
 if [ $TARGET == 'arm-v7n' ]; then
     #arm v7n
     CPU=armv7-a
@@ -431,6 +574,7 @@ if [ $TARGET == 'arm-v7n' ]; then
     ADDITIONAL_CONFIGURE_FLAG="--enable-neon "
     LIBX264_FLAGS=
     cp -a $OPENSSL_PREBUILT_FOLDER/android/openssl-armeabi-v7a/. $PREFIX
+    ARM_NEON="yes"    
     build_one
 elif [ $TARGET == 'arm64-v8a' ]; then
     #arm64-v8a

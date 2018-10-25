@@ -578,15 +578,17 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         \
         --disable-demuxers \
         --disable-muxers \
-        --enable-demuxer='aac,mpegts,mov,flv,gif,h261,h263,h264,image2,matroska,webm,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image_png_pipe,mjpeg' \
+        --enable-demuxer='aac,mpegts,flv,gif,h261,h263,h264,image2,matroska,webm,mp3,mp4,mpeg,ogg,srt,webvtt,image2,image_png_pipe,mjpeg,opus' \
         --enable-muxer='3gp,tgp,flv,gif,image2,matroska,webm,mp3,mp4,mpeg,ogg,opus,srt,webvtt,ipod,gif,mjpeg' \
         \
         --disable-encoders \
         --disable-decoders \
-        --enable-encoder='aac,gif,libmp3lame,libshine,libopus,mpeg4,png,mjpeg,gif,srt,subrip,webvtt,movtext,dnxhd' \
-        --enable-decoder='aac,aac_at,aac_fixed,aac_latm,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,mp3,mpeg4,png,apng,mjpeg,gif,srt,webvtt' \
+        --enable-encoder='aac,gif,libmp3lame,libshine,opus,mpeg4,png,mjpeg,gif,srt,subrip,webvtt,movtext,dnxhd' \
+        --enable-decoder='aac,aac_at,aac_fixed,aac_latm,flv,h261,h263,h263i,h263p,h264,vp8,vp9,opus,mp3,mpeg4,png,apng,mjpeg,gif,srt,webvtt' \
         \
         --enable-bsf=aac_adtstoasc \
+        --enable-libshine \
+        --enable-libmp3lame \
         \
         --disable-doc \
         $ADDITIONAL_CONFIGURE_FLAG

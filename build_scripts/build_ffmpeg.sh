@@ -94,8 +94,8 @@ else
     echo "Using existing `pwd`/fdk-aac-${FDK_AAC_VERSION}"
 fi
 
-LAME_MAJOR="3.99"
-LAME_VERSION="3.99.5"
+LAME_MAJOR="3.100"
+LAME_VERSION="3.100"
 if [ ! -d "lame-${LAME_VERSION}" ]; then
     echo "Downloading lame-${LAME_VERSION}"
     curl -LO http://downloads.sourceforge.net/project/lame/lame/${LAME_MAJOR}/lame-${LAME_VERSION}.tar.gz

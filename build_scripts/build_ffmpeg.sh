@@ -27,7 +27,7 @@ fi
 
 NATIVE_SYSROOT=/
 
-if [ "$FLAVOR" = "lite" ]; then 
+if [ "$FLAVOR" = "lite" ] || [ "$FLAVOR" = "super-lite" ] ; then 
     # LITE flavor support android 16+
     ARM_SYSROOT=$NDK/platforms/android-16/arch-arm/
     X86_SYSROOT=$NDK/platforms/android-16/arch-x86/

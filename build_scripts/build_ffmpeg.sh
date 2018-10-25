@@ -108,9 +108,12 @@ fi
 
 if [ ! -d "shine" ]; then
     echo "Cloning https://github.com/toots/shine"
-    git clone --depth=1 https://github.com/toots/shine.git
+    git clone https://github.com/toots/shine.git
 else
-    echo "Using existing `pwd`/shine"
+    pushd shine 
+        git fetch origin
+        git reset --hard origin/master
+    popd
 fi
 
 LIBOGG_VERSION="1.3.2"
@@ -206,7 +209,7 @@ function build_one
 {
 
 if [ "$(uname)" == "Darwin" ]; then
-    brew install yasm nasm automake gettext
+    brew install yasm nasm automake gettext || true
     export PATH="/usr/local/opt/gettext/bin:$PATH"
 else
     sudo apt-get update
@@ -246,7 +249,6 @@ then
     SYSROOT=$ARM_SYSROOT
     HOST=arm-linux-androideabi
     CROSS_PREFIX=$ARM_PREBUILT/bin/$HOST-
-    OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS "
 elif [ $ARCH == "arm64" ]
 then
     SYSROOT=$ARM64_SYSROOT
@@ -514,7 +516,7 @@ if [ "$FLAVOR" = "full" ]; then
         \
         --disable-doc \
         $ADDITIONAL_CONFIGURE_FLAG
-else 
+elif [ "$FLAVOR" == "lite" ]; then
     # Build - LITE version
     ./configure --prefix=$PREFIX \
         $CROSS_COMPILE_FLAGS \
@@ -553,6 +555,44 @@ else
         \
         --disable-doc \
         $ADDITIONAL_CONFIGURE_FLAG
+elif [ "$FLAVOR" == "super-lite" ]; then
+    # Build - SUPER-LITE version
+    ./configure --prefix=$PREFIX \
+        $CROSS_COMPILE_FLAGS \
+        --pkg-config=$(which pkg-config) \
+        --pkg-config-flags="--static" \
+        --enable-pic \
+        --enable-small \
+        --enable-gpl \
+        \
+        --disable-shared \
+        --enable-static \
+        \
+        --enable-ffmpeg \
+        --disable-ffplay \
+        --disable-ffprobe \
+        --disable-ffserver \
+        \
+        --disable-protocols \
+        --enable-protocol='file' \
+        \
+        --disable-demuxers \
+        --disable-muxers \
+        --enable-demuxer='aac,mpegts,mov,flv,gif,h261,h263,h264,image2,matroska,webm,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image_png_pipe,mjpeg' \
+        --enable-muxer='3gp,tgp,flv,gif,image2,matroska,webm,mp3,mp4,mpeg,ogg,opus,srt,webvtt,ipod,gif,mjpeg' \
+        \
+        --disable-encoders \
+        --disable-decoders \
+        --enable-encoder='aac,gif,libmp3lame,libshine,libopus,mpeg4,png,mjpeg,gif,srt,subrip,webvtt,movtext,dnxhd' \
+        --enable-decoder='aac,aac_at,aac_fixed,aac_latm,flv,h261,h263,h263i,h263p,h264,vp8,vp9,libopus,mp3,mpeg4,png,apng,mjpeg,gif,srt,webvtt' \
+        \
+        --enable-bsf=aac_adtstoasc \
+        \
+        --disable-doc \
+        $ADDITIONAL_CONFIGURE_FLAG
+else
+    echo "Unknown flavor: $FLAVOR"
+    exit 1
 fi;
 
 make clean

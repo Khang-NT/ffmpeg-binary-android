@@ -400,20 +400,49 @@ if [ "$FLAVOR" = "full" ]; then
     popd
 fi;
 
+if [ "$FLAVOR" = "full" ] || [ "$FLAVOR" = "lite" ]; then 
+    pushd opus-${OPUS_VERSION}
+    ./configure \
+        --prefix=$PREFIX \
+        --host=$HOST \
+        --enable-static \
+        --disable-shared \
+        --disable-doc \
+        --disable-extra-programs
 
-pushd opus-${OPUS_VERSION}
-./configure \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --enable-static \
-    --disable-shared \
-    --disable-doc \
-    --disable-extra-programs
+    make clean
+    make -j8
+    make install V=1
+    popd
 
-make clean
-make -j8
-make install V=1
-popd
+
+    pushd libogg-${LIBOGG_VERSION}
+    ./configure \
+        --prefix=$PREFIX \
+        --host=$HOST \
+        --enable-static \
+        --disable-shared \
+        --with-sysroot=$SYSROOT
+
+    make clean
+    make -j8
+    make install
+    popd
+
+    pushd libvorbis-${LIBVORBIS_VERSION}
+    ./configure \
+        --prefix=$PREFIX \
+        --host=$HOST \
+        --enable-static \
+        --disable-shared \
+        --with-sysroot=$SYSROOT \
+        --with-ogg=$PREFIX
+
+    make clean
+    make -j8
+    make install
+    popd
+fi;
 
 pushd lame-${LAME_VERSION}
 ./configure \
@@ -440,32 +469,6 @@ make -j8
 make install
 popd
 
-pushd libogg-${LIBOGG_VERSION}
-./configure \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --enable-static \
-    --disable-shared \
-    --with-sysroot=$SYSROOT
-
-make clean
-make -j8
-make install
-popd
-
-pushd libvorbis-${LIBVORBIS_VERSION}
-./configure \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --enable-static \
-    --disable-shared \
-    --with-sysroot=$SYSROOT \
-    --with-ogg=$PREFIX
-
-make clean
-make -j8
-make install
-popd
 
 # (wget --no-check-certificate https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/master/gas-preprocessor.pl && \
 #     chmod +x gas-preprocessor.pl && \
@@ -539,8 +542,8 @@ elif [ "$FLAVOR" == "lite" ]; then
         \
         --disable-demuxers \
         --disable-muxers \
-        --enable-demuxer='aac,avi,dnxhd,flac,flv,gif,h261,h263,h264,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image2pipe,mjpeg' \
-        --enable-muxer='3gp,dnxhd,flac,flv,gif,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,opus,srt,wav,webvtt,ipod,gif,image2,image2pipe,mjpeg' \
+        --enable-demuxer='aac,avi,dnxhd,flac,flv,gif,h261,h263,h264,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,srt,wav,webvtt,gif,image2,image2pipe,mjpeg,ffmetadata' \
+        --enable-muxer='3gp,dnxhd,flac,flv,gif,image2,matroska,webm,mov,mp3,mp4,mpeg,ogg,opus,srt,wav,webvtt,ipod,gif,image2,image2pipe,mjpeg,ffmetadata' \
         \
         --disable-encoders \
         --disable-decoders \
@@ -575,24 +578,40 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         \
         --disable-protocols \
         --enable-protocol='file' \
+        --disable-network \
+        \
+        --disable-filters \
+        --enable-filter=aresample \
+        \
+        --disable-bsfs \
+        --enable-bsf='aac_adtstoasc,vp9_superframe' \
         \
         --disable-demuxers \
         --disable-muxers \
-        --enable-demuxer='aac,mpegts,flv,gif,h261,h263,h264,image2,matroska,webm,mp3,mp4,mpeg,ogg,srt,webvtt,image2,image_png_pipe,mjpeg,opus' \
-        --enable-muxer='3gp,tgp,flv,gif,image2,matroska,webm,mp3,mp4,mpeg,ogg,opus,srt,webvtt,ipod,gif,mjpeg' \
+        --enable-demuxer='aac,mpegts,mov,srt,mp3,image2,image_png_pipe,matroska,3gp,ffmetadata' \
+        --enable-muxer='ipod,tgp,mp3,mp4,matroska,webm,3gp,opus,ffmetadata' \
         \
         --disable-encoders \
         --disable-decoders \
-        --enable-encoder='aac,gif,libmp3lame,libshine,opus,mpeg4,png,mjpeg,gif,srt,subrip,webvtt,movtext,dnxhd' \
-        --enable-decoder='aac,aac_at,aac_fixed,aac_latm,flv,h261,h263,h263i,h263p,h264,vp8,vp9,opus,mp3,mpeg4,png,apng,mjpeg,gif,srt,webvtt' \
+        --enable-encoder='aac,opus,libmp3lame,libshine,mpeg4,movtext,srt,subrip,webvtt' \
+        --enable-encoder='dnxhd' \
+        --enable-decoder='aac,aac_latm,opus,srt,subrip,webvtt,mp3,mjpeg,apng,png,matroska,webm'  \
+        --enable-decoder='h264' \
         \
-        --enable-bsf=aac_adtstoasc \
         --enable-libshine \
         --enable-libmp3lame \
+        \
+        --disable-symver \
+        --disable-amd3dnow \
+        --disable-amd3dnowext \
         \
         --disable-doc \
         $ADDITIONAL_CONFIGURE_FLAG
 else
+# --enable-demuxer='3gp,aac,mpegts,flv,mov,gif,h261,h263,h264,image2,matroska,webm,mp3,mp4,mpeg,ogg,srt,webvtt,image2,image_png_pipe,mjpeg,opus' \
+# --enable-muxer='3gp,tgp,flv,gif,image2,matroska,webm,mp3,mp4,mpeg,ogg,opus,srt,webvtt,ipod,gif,mjpeg' \
+# --enable-encoder='aac,gif,libmp3lame,libshine,opus,mpeg4,png,mjpeg,gif,srt,subrip,webvtt,movtext,dnxhd,3gp' \
+# --enable-decoder='aac,aac_at,aac_fixed,aac_latm,flv,h261,h263,h263i,h263p,h264,vp8,vp9,opus,mp3,mpeg4,png,apng,mjpeg,gif,srt,webvtt,3gp,subrip' \
     echo "Unknown flavor: $FLAVOR"
     exit 1
 fi;

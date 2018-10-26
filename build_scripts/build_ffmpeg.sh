@@ -55,16 +55,25 @@ X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
 # MIPS64_PREBUILT=$NDK/toolchains/mips64el-linux-android-4.9/prebuilt/darwin-x86_64
 # MIPS64_CROSS_PREFIX=$MIPS64_PREBUILT/bin/$HOST-
 
-if [ "$FFMPEG_VERSION" = "" ]; then
-    FFMPEG_VERSION="3.3.4"
-fi
-if [ ! -d "ffmpeg-${FFMPEG_VERSION}" ]; then
-    echo "Downloading ffmpeg-${FFMPEG_VERSION}.tar.bz2"
-    curl -LO http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2
-    echo "extracting ffmpeg-${FFMPEG_VERSION}.tar.bz2"
-    tar -xf ffmpeg-${FFMPEG_VERSION}.tar.bz2
+# if [ "$FFMPEG_VERSION" = "" ]; then
+#     FFMPEG_VERSION="3.3.4"
+# fi
+# if [ ! -d "ffmpeg-${FFMPEG_VERSION}" ]; then
+#     echo "Downloading ffmpeg-${FFMPEG_VERSION}.tar.bz2"
+#     curl -LO http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2
+#     echo "extracting ffmpeg-${FFMPEG_VERSION}.tar.bz2"
+#     tar -xf ffmpeg-${FFMPEG_VERSION}.tar.bz2
+# else
+#     echo "Using existing `pwd`/ffmpeg-${FFMPEG_VERSION}"
+# fi
+
+if [ ! -d "ffmpeg" ]; then
+    git clone --single-branch -b ffmpeg_android_compile_branch https://github.com/Khang-NT/FFmpeg.git
 else
-    echo "Using existing `pwd`/ffmpeg-${FFMPEG_VERSION}"
+    pushd ffmpeg
+        git fetch origin;
+        git reset --hard origin/ffmpeg_android_compile_branch;
+    popd
 fi
 
 LIBX264_VERSION="snapshot-20171130-2245"
@@ -473,7 +482,7 @@ popd
 # (wget --no-check-certificate https://raw.githubusercontent.com/FFmpeg/gas-preprocessor/master/gas-preprocessor.pl && \
 #     chmod +x gas-preprocessor.pl && \
 #     sudo mv gas-preprocessor.pl /usr/bin) || exit 1
-pushd ffmpeg-$FFMPEG_VERSION
+pushd ffmpeg
 
 if [ $ARCH == "native" ] 
 then
@@ -574,7 +583,6 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         --enable-ffmpeg \
         --disable-ffplay \
         --disable-ffprobe \
-        --disable-ffserver \
         \
         --disable-protocols \
         --enable-protocol='file' \
@@ -588,8 +596,8 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         \
         --disable-demuxers \
         --disable-muxers \
-        --enable-demuxer='aac,mpegts,mov,srt,mp3,image2,image_png_pipe,matroska,3gp,ffmetadata' \
-        --enable-muxer='ipod,tgp,mp3,mp4,matroska,webm,3gp,opus,ffmetadata' \
+        --enable-demuxer='aac,mpegts,mov,srt,mp3,image2,image_png_pipe,matroska,3gp,ffmetadata,mjpeg' \
+        --enable-muxer='ipod,tgp,mov,mp3,mp4,m4a,matroska,webm,3gp,opus,ffmetadata,mjpeg' \
         \
         --disable-encoders \
         --disable-decoders \

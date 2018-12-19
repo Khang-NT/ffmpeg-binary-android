@@ -512,7 +512,6 @@ if [ "$FLAVOR" = "full" ]; then
         --enable-ffmpeg \
         --disable-ffplay \
         --disable-ffprobe \
-        --disable-ffserver \
         \
         --enable-libshine \
         --enable-libmp3lame \
@@ -544,7 +543,6 @@ elif [ "$FLAVOR" == "lite" ]; then
         --enable-ffmpeg \
         --disable-ffplay \
         --disable-ffprobe \
-        --disable-ffserver \
         \
         --disable-protocols \
         --enable-protocol='file,pipe' \
@@ -576,6 +574,7 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         --enable-pic \
         --enable-small \
         --enable-gpl \
+        --enable-nonfree \
         \
         --disable-shared \
         --enable-static \
@@ -591,20 +590,15 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         --disable-filters \
         --enable-filter=aresample \
         \
-        --disable-bsfs \
-        --enable-bsf='aac_adtstoasc,vp9_superframe' \
-        \
         --disable-demuxers \
         --disable-muxers \
-        --enable-demuxer='aac,mpegts,mov,srt,mp3,image2,image_png_pipe,matroska,3gp,ffmetadata,mjpeg' \
-        --enable-muxer='ipod,tgp,mov,mp3,mp4,m4a,matroska,webm,3gp,opus,ffmetadata,mjpeg' \
+        --enable-demuxer='aac,mpegts,mov,srt,mp3,image2,image_png_pipe,matroska' \
+        --enable-muxer='ipod,tgp,mp3,mp4,webm' \
         \
         --disable-encoders \
         --disable-decoders \
-        --enable-encoder='aac,opus,libmp3lame,libshine,mpeg4,movtext,srt,subrip,webvtt' \
-        --enable-encoder='dnxhd' \
-        --enable-decoder='aac,aac_latm,opus,srt,subrip,webvtt,mp3,mjpeg,apng,png,matroska,webm'  \
-        --enable-decoder='h264' \
+        --enable-encoder='aac,libmp3lame,libshine,movtext,webvtt,srt,subrip' \
+        --enable-decoder='aac,aac_latm,srt,subrip,webvtt,mp3,mjpeg,apng,png,opus,h264'  \
         \
         --enable-libshine \
         --enable-libmp3lame \

@@ -68,7 +68,7 @@ X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
 # fi
 
 if [ ! -d "ffmpeg" ]; then
-    git clone --single-branch -b ffmpeg_android_compile_branch https://github.com/Khang-NT/FFmpeg.git
+    git clone --single-branch -b ffmpeg_android_compile_branch https://github.com/Khang-NT/FFmpeg.git ffmpeg
 else
     pushd ffmpeg
         git fetch origin;
@@ -593,7 +593,7 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         --disable-demuxers \
         --disable-muxers \
         --enable-demuxer='aac,mpegts,mov,srt,mp3,image2,image_png_pipe,matroska' \
-        --enable-muxer='ipod,tgp,mp3,mp4,webm' \
+        --enable-muxer='ipod,tgp,mp3,mp4,webm,image2' \
         \
         --disable-encoders \
         --disable-decoders \

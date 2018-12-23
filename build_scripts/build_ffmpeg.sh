@@ -68,11 +68,15 @@ X86_64_PREBUILT=$NDK/toolchains/x86_64-4.9/prebuilt/$OS
 # fi
 
 if [ ! -d "ffmpeg" ]; then
-    git clone --single-branch -b ffmpeg_android_compile_branch https://github.com/Khang-NT/FFmpeg.git ffmpeg
+    # git clone --single-branch -b ffmpeg_android_compile_branch https://github.com/Khang-NT/FFmpeg.git ffmpeg
+    git clone https://github.com/ffmpeg/FFmpeg.git ffmpeg;
+    git checkout tags/n4.1;
 else
     pushd ffmpeg
         git fetch origin;
-        git reset --hard origin/ffmpeg_android_compile_branch;
+        # git reset --hard origin/ffmpeg_android_compile_branch;
+        git reset --hard;
+        git checkout tags/n4.1;
     popd
 fi
 

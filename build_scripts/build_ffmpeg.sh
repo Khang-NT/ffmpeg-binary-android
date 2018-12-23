@@ -596,8 +596,8 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         \
         --disable-demuxers \
         --disable-muxers \
-        --enable-demuxer='aac,mpegts,mov,srt,mp3,image2,image_png_pipe,matroska' \
         --enable-muxer='ipod,tgp,mp3,mp4,webm,image2' \
+        --enable-demuxer='aac,mpegts,mov,movtext,webvtt,srt,mp3,image2,image_png_pipe,3gp,matroska' \
         \
         --disable-encoders \
         --disable-decoders \

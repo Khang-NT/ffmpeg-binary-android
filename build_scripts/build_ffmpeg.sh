@@ -601,7 +601,7 @@ elif [ "$FLAVOR" == "super-lite" ]; then
         \
         --disable-encoders \
         --disable-decoders \
-        --enable-encoder='aac,libmp3lame,libshine,movtext,webvtt,srt,subrip' \
+        --enable-encoder='aac,libmp3lame,libshine,mpeg4,opus,movtext,webvtt,srt,subrip' \
         --enable-decoder='aac,aac_latm,srt,subrip,webvtt,mp3,mjpeg,apng,png,opus,h264'  \
         \
         --enable-libshine \

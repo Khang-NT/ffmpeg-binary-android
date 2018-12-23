@@ -222,7 +222,7 @@ function build_one
 {
 
 if [ "$(uname)" == "Darwin" ]; then
-    brew install yasm nasm automake gettext || true
+    brew install yasm nasm automake gettext pkg-config libtool || true
     export PATH="/usr/local/opt/gettext/bin:$PATH"
 else
     sudo apt-get update
